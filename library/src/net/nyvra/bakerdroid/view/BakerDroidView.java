@@ -4,16 +4,14 @@ import net.nyvra.bakerdroid.R;
 import net.nyvra.bakerdroid.model.Book;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings.ZoomDensity;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -56,7 +54,7 @@ public class BakerDroidView extends ViewPager {
 			webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 			webView.setInitialScale(100);
 			webView.setWebViewClient(new BakerWebViewClient());
-			
+			webView.getSettings().setDefaultZoom(ZoomDensity.FAR);
 			container.addView(webView);
 			return webView;
 		}
@@ -81,7 +79,6 @@ public class BakerDroidView extends ViewPager {
 	private class BakerWebViewClient extends WebViewClient {
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			Log.d("--------------hrhrr", url);
 			int position = mBook.getPositionFromPage(url);
 	        if (position != -1) {
 	            BakerDroidView.this.setCurrentItem(position, true);
