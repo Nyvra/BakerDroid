@@ -188,5 +188,14 @@ public class Book {
 	public String getUrlAtPosition(int position) {
 		return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
 	}
+	
+	public int getPositionFromPage(String pageName) {
+		for (int i = 0; i < this.getContent().size(); i++) {
+			if (this.getUrlAtPosition(i).equals(pageName)) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 }
