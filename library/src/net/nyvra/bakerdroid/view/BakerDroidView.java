@@ -45,6 +45,7 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
 			WebView webView = (WebView) LayoutInflater.from(mContext).inflate(R.layout.webview, null);
+			webView.loadUrl(mBook.getUrlAtPosition(position));
 			webView.getSettings().setBuiltInZoomControls(true);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 				webView.getSettings().setDisplayZoomControls(false);
@@ -55,7 +56,7 @@ public class BakerDroidView extends ViewPager {
 			webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 			webView.setInitialScale(100);
 			webView.setWebViewClient(new BakerWebViewClient());
-			webView.loadUrl(mBook.getUrlAtPosition(position));
+			
 			container.addView(webView);
 			return webView;
 		}
