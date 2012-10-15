@@ -18,6 +18,21 @@ import android.content.Context;
 import android.content.res.AssetManager;
 
 public class Book {
+	//Required Parameters
+	public static final String P_TITLE = "title";
+	public static final String P_AUTHOR = "author";
+	public static final String P_URL = "url";
+	public static final String P_CONTENTS = "contents";
+	
+	//Optional parameters
+	public static final String P_HPUB = "hpub";
+	public static final String P_CREATOR = "creator";
+	public static final String P_PUBLISHER = "publisher";
+	public static final String P_DATE = "date";
+	public static final String P_ORIENTATION = "orientation";
+	public static final String P_ZOOMABLE = "zoomable";
+	public static final String P_COVER = "cover";
+	
 	private String mPath;
 	private String mTitle;
 	private String[] mAuthor;
@@ -53,21 +68,54 @@ public class Book {
 		
 		try {
 			JSONObject object = new JSONObject(writer.toString());
-			this.mTitle = object.getString("title");
-			this.mUrl = object.getString("url");
+			this.mTitle = object.getString(P_TITLE);
+			this.mUrl = object.getString(P_URL);
 			this.mPath = path;
 			
-			JSONArray authorArray = object.getJSONArray("author");
-			this.mAuthor = new String[authorArray.length()];
-			for (int i = 0; i < authorArray.length(); i++) {
-				this.mAuthor[i] = authorArray.getString(i);
+			JSONArray array = object.getJSONArray(P_AUTHOR);
+			this.mAuthor = new String[array.length()];
+			for (int i = 0; i < array.length(); i++) {
+				this.mAuthor[i] = array.getString(i);
 			}
 			
 			this.mContent = new ArrayList<String>();
-			JSONArray contentArray = object.getJSONArray("contents");
-			for (int i = 0; i < contentArray.length(); i++) {
-				this.mContent.add(contentArray.getString(i));
+			array = object.getJSONArray(P_CONTENTS);
+			for (int i = 0; i < array.length(); i++) {
+				this.mContent.add(array.getString(i));
 			}
+			
+			if (object.has(P_HPUB)) {
+				this.mHpub = object.getString(P_HPUB);
+			}
+			
+			if (object.has(P_CREATOR)) {
+				array = object.getJSONArray(P_CREATOR);
+				this.mCreator = new String[array.length()];
+				for (int i = 0; i < array.length(); i++) {
+					this.mCreator[i] = array.getString(i);
+				}
+			}
+			
+			if (object.has(P_PUBLISHER)) {
+				this.mPublisher = object.getString(P_PUBLISHER);
+			}
+			
+			if (object.has(P_DATE)) {
+				this.mDate = object.getString(P_DATE);
+			}
+			
+			if (object.has(P_ORIENTATION)) {
+				this.mOrientation = object.getString(P_ORIENTATION);
+			}
+			
+			if (object.has(P_ZOOMABLE)) {
+				this.mZoomable = object.getBoolean(P_ZOOMABLE);
+			}
+			
+			if (object.has(P_COVER)) {
+				this.mCover = object.getString(P_COVER);
+			}
+			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -185,6 +233,7 @@ public class Book {
 		this.mPath = mPath;
 	}
 	
+	//TODO: get right path, not from assets
 	public String getUrlAtPosition(int position) {
 		return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
 	}
