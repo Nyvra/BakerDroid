@@ -4,6 +4,8 @@ import net.nyvra.bakerdroid.R;
 import net.nyvra.bakerdroid.model.Book;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -11,7 +13,9 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings.LayoutAlgorithm;
+import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -48,12 +52,14 @@ public class BakerDroidView extends ViewPager {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 				webView.getSettings().setDisplayZoomControls(false);
 			}
+			webView.getSettings().setPluginState(PluginState.ON);
 			webView.getSettings().setJavaScriptEnabled(true);
 			webView.getSettings().setLoadWithOverviewMode(true);
 			webView.getSettings().setUseWideViewPort(true);
 			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
 			webView.setInitialScale(1);
 			webView.setWebViewClient(new BakerWebViewClient());
+			webView.setWebChromeClient(new BakerWebChromeClient());
 			container.addView(webView);
 			return webView;
 		}
@@ -86,6 +92,10 @@ public class BakerDroidView extends ViewPager {
 	        	return false;
 	        }
 	    }
+	}
+	
+	private class BakerWebChromeClient extends WebChromeClient {
+		
 	}
 
 }
