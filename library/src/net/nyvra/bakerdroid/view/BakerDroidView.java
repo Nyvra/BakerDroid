@@ -10,6 +10,7 @@ import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,17 +22,23 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class BakerDroidView extends ViewPager {
+	private static final String TAG = BakerDroidView.class.getSimpleName();
+	
 	private Book mBook;
 	private Context mContext;
-	int[] mScrollYPositions;
+	private int[] mScrollYPositions;
+	private BakerDroidView mPager;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mContext = context;
+		mPager = this;
 	}
 	
 	public BakerDroidView(Context context) {
 		super(context);
+		mContext = context;
+		mPager = this;
 	}
 
 	public Book getBook() {
@@ -39,8 +46,10 @@ public class BakerDroidView extends ViewPager {
 	}
 
 	public void loadBook(String pathToBook) {
-		this.mBook = new Book(this.mContext, pathToBook);
+		this.mBook = new Book(mContext, pathToBook);
 		this.setAdapter(new BakerDroidAdapter());
+		this.setOffscreenPageLimit(1);
+		this.setOnPageChangeListener(new PageChangeListener());
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
@@ -54,7 +63,7 @@ public class BakerDroidView extends ViewPager {
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-			WebView webView = (WebView) LayoutInflater.from(mContext).inflate(R.layout.webview, null);
+			final WebView webView = (WebView) LayoutInflater.from(mContext).inflate(R.layout.webview, null);
 			webView.loadUrl(mBook.getUrlAtPosition(position));
 			webView.getSettings().setBuiltInZoomControls(true);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -77,6 +86,7 @@ public class BakerDroidView extends ViewPager {
 				mWebChromeClient = new BakerWebChromeClient();
 			}
 			webView.setWebChromeClient(mWebChromeClient);
+			
 			container.addView(webView);
 			return webView;
 		}
@@ -100,6 +110,7 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebViewClient extends WebViewClient {
+		
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
@@ -108,13 +119,23 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
+			
+			if (mBook.getUrlAtPosition(mPager.getCurrentItem()).equals(url)) {
+				int scrollY = mScrollYPositions[mPager.getCurrentItem()];
+				if (scrollY > 0) {
+			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
+			        sb.append(scrollY);
+			        sb.append("/ window.devicePixelRatio);");
+			        view.loadUrl(sb.toString());
+			    }
+			}
 		}
 		
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			int position = mBook.getPositionFromPage(url);
 	        if (position != -1) {
-	            BakerDroidView.this.setCurrentItem(position, true);
+	            mPager.setCurrentItem(position, true);
 	            return true;
 	        } else {
 	        	return false;
@@ -123,6 +144,30 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebChromeClient extends WebChromeClient {
+		@Override
+		public void onProgressChanged(final WebView view, int newProgress) {
+			super.onProgressChanged(view, newProgress);
+		}
+	}
+	
+	private class PageChangeListener implements OnPageChangeListener {
+
+		@Override
+		public void onPageScrollStateChanged(int position) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onPageSelected(int position) {
+			Log.d(TAG, String.format("Showing page: %d - %s", new Object[] {position, mBook.getContent().get(position)}));
+		}
 		
 	}
 
