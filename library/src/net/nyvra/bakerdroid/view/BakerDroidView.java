@@ -1,7 +1,7 @@
 package net.nyvra.bakerdroid.view;
 
 import net.nyvra.bakerdroid.R;
-import net.nyvra.bakerdroid.model.Book;
+import net.nyvra.bakerdroid.model.HPubDocument;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,7 +24,7 @@ import android.webkit.WebViewClient;
 public class BakerDroidView extends ViewPager {
 	private static final String TAG = BakerDroidView.class.getSimpleName();
 	
-	private Book mBook;
+	private HPubDocument mDocument;
 	private Context mContext;
 	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
@@ -41,15 +41,14 @@ public class BakerDroidView extends ViewPager {
 		mPager = this;
 	}
 
-	public Book getBook() {
-		return mBook;
+	public HPubDocument getDocument() {
+		return mDocument;
 	}
 
-	public void loadBook(String pathToBook) {
-		this.mBook = new Book(mContext, pathToBook);
+	public void loadDocument(String pathToBook) {
+		this.mDocument = new HPubDocument(mContext, pathToBook);
 		this.setAdapter(new BakerDroidAdapter());
 		this.setOffscreenPageLimit(1);
-		this.setOnPageChangeListener(new PageChangeListener());
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
@@ -57,14 +56,14 @@ public class BakerDroidView extends ViewPager {
 		BakerWebChromeClient mWebChromeClient;
 		
 		public BakerDroidAdapter() {
-			mScrollYPositions = new int[mBook.getContent().size()];
+			mScrollYPositions = new int[mDocument.getContent().size()];
 		}
 		
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
 			final WebView webView = (WebView) LayoutInflater.from(mContext).inflate(R.layout.webview, null);
-			webView.loadUrl(mBook.getUrlAtPosition(position));
+			webView.loadUrl(mDocument.getUrlAtPosition(position));
 			webView.getSettings().setBuiltInZoomControls(true);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 				webView.getSettings().setDisplayZoomControls(false);
@@ -93,13 +92,15 @@ public class BakerDroidView extends ViewPager {
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
-			mScrollYPositions[position] = ((WebView) object).getScrollY();
+			int scrollY = ((WebView) object).getScrollY();
+			mScrollYPositions[position] = scrollY;
+			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {position, scrollY}));
 			container.removeView((View) object);
 		}
 
 		@Override
 		public int getCount() {
-			return mBook.getContent().size();
+			return mDocument.getContent().size();
 		}
 
 		@Override
@@ -119,21 +120,19 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
-			
-			if (mBook.getUrlAtPosition(mPager.getCurrentItem()).equals(url)) {
-				int scrollY = mScrollYPositions[mPager.getCurrentItem()];
-				if (scrollY > 0) {
-			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
-			        sb.append(scrollY);
-			        sb.append("/ window.devicePixelRatio);");
-			        view.loadUrl(sb.toString());
-			    }
-			}
+			int position = mDocument.getPositionFromPage(url);
+			int scrollY = mScrollYPositions[position];
+			if (scrollY > 0) {
+		        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
+		        sb.append(scrollY);
+		        sb.append("/ window.devicePixelRatio);");
+		        view.loadUrl(sb.toString());
+		    }
 		}
 		
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			int position = mBook.getPositionFromPage(url);
+			int position = mDocument.getPositionFromPage(url);
 	        if (position != -1) {
 	            mPager.setCurrentItem(position, true);
 	            return true;
@@ -144,31 +143,6 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebChromeClient extends WebChromeClient {
-		@Override
-		public void onProgressChanged(final WebView view, int newProgress) {
-			super.onProgressChanged(view, newProgress);
-		}
-	}
-	
-	private class PageChangeListener implements OnPageChangeListener {
-
-		@Override
-		public void onPageScrollStateChanged(int position) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onPageScrolled(int arg0, float arg1, int arg2) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onPageSelected(int position) {
-			Log.d(TAG, String.format("Showing page: %d - %s", new Object[] {position, mBook.getContent().get(position)}));
-		}
-		
 	}
 
 }
