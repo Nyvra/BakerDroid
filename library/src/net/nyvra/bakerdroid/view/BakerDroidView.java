@@ -1,5 +1,8 @@
 package net.nyvra.bakerdroid.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.nyvra.bakerdroid.R;
 import net.nyvra.bakerdroid.model.HPubDocument;
 
@@ -20,6 +23,7 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 public class BakerDroidView extends ViewPager {
 	private static final String TAG = BakerDroidView.class.getSimpleName();
@@ -28,6 +32,7 @@ public class BakerDroidView extends ViewPager {
 	private Context mContext;
 	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
+	private List<String> mHistory;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -49,6 +54,7 @@ public class BakerDroidView extends ViewPager {
 		this.mDocument = new HPubDocument(mContext, pathToBook);
 		this.setAdapter(new BakerDroidAdapter());
 		this.setOffscreenPageLimit(1);
+		this.mHistory = new ArrayList<String>();
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
@@ -62,7 +68,8 @@ public class BakerDroidView extends ViewPager {
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-			final WebView webView = (WebView) LayoutInflater.from(mContext).inflate(R.layout.webview, null);
+			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
+			WebView webView = (WebView) view.findViewById(R.id.webview);
 			webView.loadUrl(mDocument.getUrlAtPosition(position));
 			webView.getSettings().setBuiltInZoomControls(true);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -85,14 +92,16 @@ public class BakerDroidView extends ViewPager {
 				mWebChromeClient = new BakerWebChromeClient();
 			}
 			webView.setWebChromeClient(mWebChromeClient);
+			ProgressBar progress = (ProgressBar) view.findViewById(R.id.progressbar);
+			webView.setTag(progress);
 			
-			container.addView(webView);
-			return webView;
+			container.addView(view);
+			return view;
 		}
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
-			int scrollY = ((WebView) object).getScrollY();
+			int scrollY = ((View) object).findViewById(R.id.webview).getScrollY();
 			mScrollYPositions[position] = scrollY;
 			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {position, scrollY}));
 			container.removeView((View) object);
@@ -115,6 +124,12 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
+			
+			ProgressBar progress = (ProgressBar) view.getTag();
+			if (progress != null) {
+				view.setVisibility(View.GONE);
+				progress.setVisibility(View.VISIBLE);
+			}
 		}
 		
 		@Override
@@ -130,10 +145,16 @@ public class BakerDroidView extends ViewPager {
 			        view.loadUrl(sb.toString());
 			    }
 			}
+			ProgressBar progress = (ProgressBar) view.getTag();
+			if (progress != null) {
+				view.setVisibility(View.VISIBLE);
+				progress.setVisibility(View.GONE);
+			}
 		}
 		
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			mHistory.add(url);
 			int position = mDocument.getPositionFromPage(url);
 	        if (position != -1) {
 	            mPager.setCurrentItem(position, true);
@@ -145,6 +166,7 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebChromeClient extends WebChromeClient {
+		
 	}
 
 }
