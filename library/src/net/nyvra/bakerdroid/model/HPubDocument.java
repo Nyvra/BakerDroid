@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.res.AssetManager;
 
-public class Book {
+public class HPubDocument {
 	//Required Parameters
 	public static final String P_TITLE = "title";
 	public static final String P_AUTHOR = "author";
@@ -50,7 +50,7 @@ public class Book {
 	
 	
 	//NOTE: just a test
-	public Book(Context context, String path) {
+	public HPubDocument(Context context, String path) {
 		AssetManager assetManager = context.getAssets();
 		Writer writer = new StringWriter();
 		char[] buffer = new char[1024];
