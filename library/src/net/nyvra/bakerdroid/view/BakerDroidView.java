@@ -121,13 +121,15 @@ public class BakerDroidView extends ViewPager {
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
 			int position = mDocument.getPositionFromPage(url);
-			int scrollY = mScrollYPositions[position];
-			if (scrollY > 0) {
-		        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
-		        sb.append(scrollY);
-		        sb.append("/ window.devicePixelRatio);");
-		        view.loadUrl(sb.toString());
-		    }
+			if (position != -1) {
+				int scrollY = mScrollYPositions[position];
+				if (scrollY > 0) {
+			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
+			        sb.append(scrollY);
+			        sb.append("/ window.devicePixelRatio);");
+			        view.loadUrl(sb.toString());
+			    }
+			}
 		}
 		
 		@Override
