@@ -1,0 +1,41 @@
+{
+    "hpub": 1,
+    "title": "Epistola aos Tessalonicenses",
+    "author": ["Heberti Almeida"],
+    "creator": ["Heberti Almeida"],
+    "date": "2012-06-13",
+    "url": "book://www.cpb.com.br/lesapp/",
+
+    "orientation": "both",
+    "zoomable": false,
+
+    "-baker-background": "#000000",
+    "-baker-vertical-bounce": true,
+    "-baker-index-height": 130,
+    "-baker-media-autoplay": false,
+    "-baker-background-image-portrait": "images/background-portrait.png",
+    "-baker-background-image-landscape": "images/background-landscape.png",
+    "-baker-page-numbers-color": "#333333",
+
+    "contents": [
+        "Cover.html",
+        "HowTo.html",
+        "Contents.html",
+        "Expedient.html",
+        "Introduction.html",
+        "01.html",
+		"02.html",
+        "03.html",
+        "04.html",
+        "05.html",
+        "06.html",
+        "07.html",
+        "08.html",
+        "09.html",
+        "10.html",
+        "11.html",
+        "12.html",
+        "13.html",
+        "Projects.html"
+     ]
+}

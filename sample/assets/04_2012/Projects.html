@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:csi="http://www.massimocorner.com/libraries/csi/" lang="de">
+<head>
+	<meta charset="utf-8">
+	<!--Prevent pinch to zoom on iOS devices-->
+	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;" />
+	<!--Allow saving as a web app on the home screen on iOS Devices (doesn't apply in Baker)-->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="format-detection" content="telephone=no" />
+
+
+	<!--Title. The content of the title is displayed on the loading screen on iOS devices-->
+	<title>Projetos Missionários</title>
+
+	<!--
+	############################################################################
+	Stylesheets ################################################################
+	############################################################################
+	-->
+
+	<!--Loading the main style sheet-->
+	<link href="styles/styles.css" rel="stylesheet" type="text/css" />
+
+	<!--
+	############################################################################
+	Javascripts ################################################################
+	############################################################################
+	-->
+	<script src="js/jquery-1.5.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="js/tmt_core.js"></script>
+	<script type="text/javascript" src="js/tmt_net.js"></script>
+	<script type="text/javascript" src="js/tmt_csi.js"></script>
+	<script src="js/jquery.touchSwipe-1.2.1.js" type="text/javascript"></script>
+	<script src="js/jquery.autoresize.js" type="text/javascript"></script>
+	<script src="js/app.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		function initialize() {
+			var myLatlng = new google.maps.LatLng(-27.293689,-58.724121);
+			//var myLatlng = new google.maps.LatLng(12.683215,113.466797);
+			var myOptions = {
+				zoom: 3,
+				center: myLatlng,
+				mapTypeId: google.maps.MapTypeId.TERRAIN
+			}
+			var map = new google.maps.Map(document.getElementById("map-frame"), myOptions);
+
+			
+			// Marker
+			    var pinColor = "FE7569";
+				var pinImage = function(label) {
+					return new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld="+label+"|" + pinColor,
+						new google.maps.Size(21, 34),
+						new google.maps.Point(0,0),
+						new google.maps.Point(10, 34));
+				};
+				var pinShadow = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_shadow",
+					new google.maps.Size(40, 37),
+					new google.maps.Point(0, 0),
+					new google.maps.Point(12, 35));
+			
+			
+			var marker = new google.maps.Marker({
+				//position: new google.maps.LatLng(1.493056, 124.841389),
+				position: new google.maps.LatLng(-15.538376,-47.834473),
+				icon: pinImage("A"),
+				shadow: pinShadow,
+				animation: google.maps.Animation.DROP
+			});	
+			var marker1 = new google.maps.Marker({
+				position: new google.maps.LatLng(-16.189618,-48.708675),
+				icon: pinImage("B"),
+				shadow: pinShadow,
+				animation: google.maps.Animation.DROP
+			});			
+			var marker2 = new google.maps.Marker({
+				position: new google.maps.LatLng(-5.57225,-76.691162),
+				icon: pinImage("C"),
+				shadow: pinShadow,
+				animation: google.maps.Animation.DROP
+			});
+			var marker3 = new google.maps.Marker({
+				position: new google.maps.LatLng(-5.528511,-76.031982),
+				icon: pinImage("D"),
+				shadow: pinShadow,
+				animation: google.maps.Animation.DROP
+			});
+
+			// To add the marker to the map, call setMap();
+			marker.setMap(map);  
+			marker1.setMap(map);
+			marker2.setMap(map); 
+			marker3.setMap(map);
+		}
+		  
+		function loadScript() {
+			var script = document.createElement("script");
+			script.type = "text/javascript";
+			script.src = "http://maps.google.com/maps/api/js?sensor=false&callback=initialize&language=pt_BR";
+			document.body.appendChild(script);
+		}
+		  
+		window.onload = loadScript;
+	</script>
+</head>
+<body id="ini" class="projects contents-index">
+	<a href="#ini" class="top" title="Ir para o topo"></a>
+	
+	<div id="main-edit-menu" class="main-edit-menu">
+		<ul class="edit-menu">
+			<li><span class="edit-menu-yellow" onclick="setYellow();"></span></li>
+			<li><span class="edit-menu-green" onclick="setGreen();"></span></li>
+			<li><span class="edit-menu-blue" onclick="setBlue();"></span></li>
+			<li class="last-r"><span class="edit-menu-pink" onclick="setPink();"></span></li>
+			<li class="last-l"><span class="edit-menu-remove" onclick="removeThisHighlight();"></span></li>
+		</ul>
+		<span class="edit-menu-label-fix"></span>
+		<span class="edit-menu-label"></span>
+	</div>
+	<!--
+	############################################################################
+	Start content ##############################################################
+	############################################################################
+	-->
+
+	<!--Main content-->
+	<div class="content-element">
+		<div class="full-column">
+		<!-- <object width="667" height="369"><param name="movie" value="http://www.youtube.com/v/H5Swlkkt1YY?version=3&amp;hl=pt_BR&amp;rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/H5Swlkkt1YY?version=3&amp;hl=pt_BR&amp;rel=0" type="application/x-shockwave-flash" width="667" height="369" allowscriptaccess="always" allowfullscreen="true"></embed></object> -->
+			<br />
+			<h1>Divisão Sul-Americana</h1>
+			<br />
+			<br />
+			<h2 class="proj-title">Projetos</h2>
+			<ol type="A" class="proj-list">
+				<li><span>Construção de igrejas na União Centro-Oeste Brasileira.</span></li>
+				<li><span>Construção da igreja do Instituto Adventista Brasil Central (IABC).</span></li>
+				<li><span>Construção de igrejas no Norte do Peru.</span></li>
+				<li><span>Projeto Infantil: Material de treinamento para crianças que dirigem pequenos grupos no Norte do Peru.</span></li>
+			</ol>
+			
+			<br />
+			<div id="map-container">
+				<div id="map-frame" style="height:480px"></div>
+			</div>
+			<!-- <iframe class="map" width="100%" height="480" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com.br/?ie=UTF8&amp;ll=12.683215,113.466797&amp;spn=37.052244,67.631836&amp;t=p&amp;z=4&amp;output=embed"></iframe> -->
+		</div>
+		
+	</div> <!--Div content element-->
+	
+	<!-- <iframe width="100%" height="480" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=pt-BR&amp;geocode=&amp;q=Mong%C3%B3lia&amp;aq=&amp;sll=46.862496,103.846656&amp;sspn=26.429738,67.631836&amp;ie=UTF8&amp;hq=&amp;hnear=Mongolia&amp;t=m&amp;z=5&amp;ll=46.862496,103.846656&amp;output=embed"></iframe> -->
+	
+	
+	
+	
+	
+	<!-- <iframe width="100%" height="480" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://www.google.de/maps?f=q&amp;source=s_q&amp;hl=de&amp;geocode=&amp;q=new+york+city&amp;sll=51.151786,10.415039&amp;sspn=22.197694,37.353516&amp;vpsrc=6&amp;t=h&amp;ie=UTF8&amp;hq=&amp;hnear=New+York+City,+New+York,+Vereinigte+Staaten&amp;ll=40.734251,-74.010086&amp;spn=0.249745,0.439453&amp;z=11&amp;iwloc=A&amp;output=embed"></iframe> -->
+	
+	<!--
+	############################################################################
+	End of content #############################################################
+	############################################################################
+	-->
+
+  
+  
+	<!--
+	############################################################################
+	Start Footer ###############################################################
+	############################################################################
+	-->
+	
+	<!--Include footer data from inc/footer.html-->
+	<!--<div class="footer">
+	  <div id="includeFooter" csi:src="inc/footer.html"></div>
+	</div>!--Div footer-->
+
+	<!--
+	############################################################################
+	End Footer #################################################################
+	############################################################################
+	-->
+
+</body>
+</html>
