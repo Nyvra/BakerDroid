@@ -11,7 +11,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings.ZoomDensity;
+import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -49,12 +49,11 @@ public class BakerDroidView extends ViewPager {
 				webView.getSettings().setDisplayZoomControls(false);
 			}
 			webView.getSettings().setJavaScriptEnabled(true);
-			webView.getSettings().setLoadWithOverviewMode(false);
-			webView.getSettings().setUseWideViewPort(false);
-			webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-			webView.setInitialScale(100);
+			webView.getSettings().setLoadWithOverviewMode(true);
+			webView.getSettings().setUseWideViewPort(true);
+			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+			webView.setInitialScale(1);
 			webView.setWebViewClient(new BakerWebViewClient());
-			webView.getSettings().setDefaultZoom(ZoomDensity.FAR);
 			container.addView(webView);
 			return webView;
 		}
