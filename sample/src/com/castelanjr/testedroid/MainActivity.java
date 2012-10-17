@@ -1,6 +1,6 @@
 package com.castelanjr.testedroid;
 
-import net.nyvra.bakerdroid.view.BakerDroidView;
+import net.nyvra.bakerdroid.BakerDroidView;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;

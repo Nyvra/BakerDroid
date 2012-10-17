@@ -1,4 +1,4 @@
-package net.nyvra.bakerdroid.view;
+package net.nyvra.bakerdroid;
 
 import java.util.ArrayList;
 import java.util.List;
