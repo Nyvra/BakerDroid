@@ -10,6 +10,9 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.nyvra.bakerdroid.utils.Utils;
+import net.nyvra.bakerdroid.utils.Utils.StorageMode;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,22 +51,23 @@ public class HPubDocument {
 	private String mFile;
 	private List<Setting> mSettings;
 	
-	
-	//NOTE: just a test
 	public HPubDocument(Context context, String path) {
-		AssetManager assetManager = context.getAssets();
-		Writer writer = new StringWriter();
-		char[] buffer = new char[1024];
-		try {
-			InputStream input = assetManager.open(path.concat("/book.json"));
-			Reader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-			int n;
-			while ((n = reader.read(buffer)) != -1) {
-				writer.write(buffer, 0, n);
+		Writer writer = null;
+		if (Utils.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+			AssetManager assetManager = context.getAssets();
+			writer = new StringWriter();
+			char[] buffer = new char[1024];
+			try {
+				InputStream input = assetManager.open(path.concat("/book.json"));
+				Reader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+				int n;
+				while ((n = reader.read(buffer)) != -1) {
+					writer.write(buffer, 0, n);
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 		try {
