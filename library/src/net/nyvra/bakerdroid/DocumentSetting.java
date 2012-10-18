@@ -1,6 +1,6 @@
-package net.nyvra.bakerdroid.model;
+package net.nyvra.bakerdroid;
 
-public class Setting {
+public class DocumentSetting {
 	private String mKey;
 	private String mValue;
 	private Type mType;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.nyvra.bakerdroid.R;
-import net.nyvra.bakerdroid.model.HPubDocument;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

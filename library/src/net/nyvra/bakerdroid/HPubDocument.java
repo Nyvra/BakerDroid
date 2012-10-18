@@ -1,4 +1,4 @@
-package net.nyvra.bakerdroid.model;
+package net.nyvra.bakerdroid;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,8 +10,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.nyvra.bakerdroid.utils.Utils;
-import net.nyvra.bakerdroid.utils.Utils.StorageMode;
+import net.nyvra.bakerdroid.Configs.StorageMode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,11 +48,11 @@ public class HPubDocument {
 	private boolean mZoomable = false;
 	private String mCover;
 	private String mFile;
-	private List<Setting> mSettings;
+	private List<DocumentSetting> mSettings;
 	
 	public HPubDocument(Context context, String path) {
 		Writer writer = null;
-		if (Utils.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+		if (Configs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
 			AssetManager assetManager = context.getAssets();
 			writer = new StringWriter();
 			char[] buffer = new char[1024];
@@ -221,11 +220,11 @@ public class HPubDocument {
 		this.mFile = mFile;
 	}
 
-	public List<Setting> getSettings() {
+	public List<DocumentSetting> getSettings() {
 		return mSettings;
 	}
 
-	public void setSettings(List<Setting> mSettings) {
+	public void setSettings(List<DocumentSetting> mSettings) {
 		this.mSettings = mSettings;
 	}
 
