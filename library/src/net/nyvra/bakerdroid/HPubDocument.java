@@ -1,6 +1,7 @@
 package net.nyvra.bakerdroid;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,21 +53,25 @@ public class HPubDocument {
 	
 	public HPubDocument(Context context, String path) {
 		Writer writer = null;
-		if (Configs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
-			AssetManager assetManager = context.getAssets();
-			writer = new StringWriter();
-			char[] buffer = new char[1024];
-			try {
-				InputStream input = assetManager.open(path.concat("/book.json"));
-				Reader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-				int n;
-				while ((n = reader.read(buffer)) != -1) {
-					writer.write(buffer, 0, n);
-				}
-				
-			} catch (IOException e) {
-				e.printStackTrace();
+			
+		writer = new StringWriter();
+		char[] buffer = new char[1024];
+		try {
+			InputStream input;
+			if (Configs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+				AssetManager assetManager = context.getAssets();
+				input = assetManager.open(path.concat("/book.json"));
+			} else {
+				input = new FileInputStream(path);
 			}
+			Reader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+			int n;
+			while ((n = reader.read(buffer)) != -1) {
+				writer.write(buffer, 0, n);
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 		try {
