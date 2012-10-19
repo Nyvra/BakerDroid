@@ -8,6 +8,7 @@ import net.nyvra.bakerdroid.R;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -49,11 +50,23 @@ public class BakerDroidView extends ViewPager {
 		return mDocument;
 	}
 
-	public void loadDocument(String pathToBook) {
-		this.mDocument = new HPubDocument(mContext, pathToBook);
-		this.setAdapter(new BakerDroidAdapter());
-		this.setOffscreenPageLimit(1);
-		this.mHistory = new ArrayList<String>();
+	public void loadDocument(final String pathToBook) {
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				mDocument = new HPubDocument(mContext, pathToBook);
+				return null;
+			}
+			
+			protected void onPostExecute(Void result) {
+				setAdapter(new BakerDroidAdapter());
+				setOffscreenPageLimit(1);
+				mHistory = new ArrayList<String>();
+			};
+			
+		}.execute();
+		
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
