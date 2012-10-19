@@ -11,7 +11,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.nyvra.bakerdroid.Configs.StorageMode;
+import net.nyvra.bakerdroid.BakerDroidConfigs.StorageMode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,11 +58,11 @@ public class HPubDocument {
 		char[] buffer = new char[1024];
 		try {
 			InputStream input;
-			if (Configs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+			if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
 				AssetManager assetManager = context.getAssets();
 				input = assetManager.open(path.concat("/book.json"));
 			} else {
-				input = new FileInputStream(path);
+				input = new FileInputStream(path.concat("/book.json"));
 			}
 			Reader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
 			int n;
@@ -243,7 +243,11 @@ public class HPubDocument {
 	
 	//TODO: get right path, not from assets
 	public String getUrlAtPosition(int position) {
-		return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
+		if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
+		} else {
+			return String.format("file://%s/%s", new Object[] {mPath, mContent.get(position)});
+		}
 	}
 	
 	public int getPositionFromPage(String pageName) {
