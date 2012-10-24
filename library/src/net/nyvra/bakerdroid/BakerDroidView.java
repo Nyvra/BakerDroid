@@ -69,6 +69,10 @@ public class BakerDroidView extends ViewPager {
 		
 	}
 	
+	public int getCurrentItemScrollPosition() {
+		return mScrollYPositions[getCurrentItem()];
+	}
+	
 	class BakerDroidAdapter extends PagerAdapter {
 		BakerWebViewClient mWebViewCLient;
 		BakerWebChromeClient mWebChromeClient;
