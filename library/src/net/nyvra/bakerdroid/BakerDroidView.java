@@ -12,6 +12,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,17 +31,20 @@ public class BakerDroidView extends ViewPager {
 	private Context mContext;
 	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
+	SparseArray<View> mWebViews;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mContext = context;
 		mPager = this;
+		mWebViews = new SparseArray<View>();
 	}
 	
 	public BakerDroidView(Context context) {
 		super(context);
 		mContext = context;
 		mPager = this;
+		mWebViews = new SparseArray<View>();
 	}
 
 	public HPubDocument getDocument() {
@@ -70,6 +74,17 @@ public class BakerDroidView extends ViewPager {
 			
 		}.execute();
 		
+	}
+	
+	public void persistCurrentItemsScrolling() {
+		for (int i = 0; i < mWebViews.size(); i++) {
+			int key = mWebViews.keyAt(i);
+			View value = mWebViews.get(key);
+			WebView webView = (WebView) value.findViewById(R.id.webview);
+			int scrollY = webView.getScrollY();
+			mScrollYPositions[key] = scrollY;
+			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {key, scrollY}));
+		}
 	}
 	
 	public int[] getScrollPositions() {
@@ -133,6 +148,7 @@ public class BakerDroidView extends ViewPager {
 			webView.setTag(progress);
 			
 			container.addView(view);
+			mWebViews.put(position, view);
 			return view;
 		}
 		
@@ -141,6 +157,7 @@ public class BakerDroidView extends ViewPager {
 			int scrollY = ((View) object).findViewById(R.id.webview).getScrollY();
 			mScrollYPositions[position] = scrollY;
 			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {position, scrollY}));
+			mWebViews.remove(position);
 			container.removeView((View) object);
 		}
 
