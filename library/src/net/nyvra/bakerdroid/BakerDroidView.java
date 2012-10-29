@@ -47,7 +47,7 @@ public class BakerDroidView extends ViewPager {
 		return mDocument;
 	}
 
-	public void loadDocument(final String pathToBook, final int[] scrollPositions) {
+	public void loadDocument(final String pathToBook, final int[] scrollPositions, final int initialPage) {
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -65,6 +65,7 @@ public class BakerDroidView extends ViewPager {
 				}
 				setAdapter(adapter);
 				setOffscreenPageLimit(1);
+				setCurrentItem(initialPage);
 			};
 			
 		}.execute();
