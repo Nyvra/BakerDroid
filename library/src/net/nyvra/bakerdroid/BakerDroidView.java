@@ -1,8 +1,5 @@
 package net.nyvra.bakerdroid;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.nyvra.bakerdroid.R;
 
 import android.annotation.SuppressLint;
@@ -10,6 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -32,7 +30,6 @@ public class BakerDroidView extends ViewPager {
 	private Context mContext;
 	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
-	private List<String> mHistory;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -50,7 +47,7 @@ public class BakerDroidView extends ViewPager {
 		return mDocument;
 	}
 
-	public void loadDocument(final String pathToBook) {
+	public void loadDocument(final String pathToBook, final int[] scrollPositions) {
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -60,17 +57,36 @@ public class BakerDroidView extends ViewPager {
 			}
 			
 			protected void onPostExecute(Void result) {
-				setAdapter(new BakerDroidAdapter());
+				BakerDroidAdapter adapter = null;
+				if (scrollPositions == null) {
+					adapter = new BakerDroidAdapter();
+				} else {
+					adapter = new BakerDroidAdapter(scrollPositions);
+				}
+				setAdapter(adapter);
 				setOffscreenPageLimit(1);
-				mHistory = new ArrayList<String>();
 			};
 			
 		}.execute();
 		
 	}
 	
+	public int[] getScrollPositions() {
+		return mScrollYPositions;
+	}
+	
 	public int getCurrentItemScrollPosition() {
 		return mScrollYPositions[getCurrentItem()];
+	}
+	
+	@Override
+	public Parcelable onSaveInstanceState() {
+		return super.onSaveInstanceState();
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Parcelable state) {
+		super.onRestoreInstanceState(state);
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
@@ -79,6 +95,10 @@ public class BakerDroidView extends ViewPager {
 		
 		public BakerDroidAdapter() {
 			mScrollYPositions = new int[mDocument.getContent().size()];
+		}
+		
+		public BakerDroidAdapter(int[] savedScrollPositions) {
+			mScrollYPositions = savedScrollPositions;
 		}
 		
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
@@ -170,7 +190,6 @@ public class BakerDroidView extends ViewPager {
 		
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			mHistory.add(url);
 			int position = mDocument.getPositionFromPage(url);
 	        if (position != -1) {
 	            mPager.setCurrentItem(position, true);
