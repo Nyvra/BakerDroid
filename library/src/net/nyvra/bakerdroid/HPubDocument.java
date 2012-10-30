@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 public class HPubDocument {
 	//Required Parameters
@@ -200,6 +201,16 @@ public class HPubDocument {
 			}
 		}
 		return -1;
+	}
+	
+	public String getFullURL(String pageName) {
+		if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
+		} else {
+			String str = String.format("file://%s/%s", new Object[] {mPath, pageName});
+			Log.d("tag", str);
+			return str;
+		}
 	}
 
 }
