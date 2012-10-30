@@ -14,6 +14,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
@@ -33,6 +34,8 @@ public class BakerDroidView extends ViewPager {
 	private BakerDroidView mPager;
 	private SparseArray<View> mViews;
 	private OnHPubLoadedListener mListener;
+	private OnDoubleTapListener mDoubleTapListener;
+	private long mLastTouchTime = -1;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -82,6 +85,10 @@ public class BakerDroidView extends ViewPager {
 	
 	public void setOnHpubLoadedListener(OnHPubLoadedListener listener) {
 		mListener = listener;
+	}
+	
+	public void setOnDoubleTapListener(OnDoubleTapListener l) {
+		mDoubleTapListener = l;
 	}
 	
 	public void persistCurrentItemsScrolling() {
@@ -152,6 +159,23 @@ public class BakerDroidView extends ViewPager {
 				mWebChromeClient = new BakerWebChromeClient();
 			}
 			webView.setWebChromeClient(mWebChromeClient);
+			webView.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					if (event.getAction() == MotionEvent.ACTION_DOWN) {
+						long thisTime = System.currentTimeMillis();
+						
+						if (thisTime - mLastTouchTime < 250) {
+							mDoubleTapListener.onDoubleTap();
+							mLastTouchTime = -1;
+						} else {
+							mLastTouchTime = thisTime;
+						}
+					}
+					return false;
+				}
+			});
 			ProgressBar progress = (ProgressBar) view.findViewById(R.id.progressbar);
 			webView.setTag(progress);
 			
@@ -232,6 +256,10 @@ public class BakerDroidView extends ViewPager {
 	
 	public interface OnHPubLoadedListener {
 		public void onHPubLoaded();
+	}
+	
+	public interface OnDoubleTapListener {
+		public void onDoubleTap();
 	}
 
 }
