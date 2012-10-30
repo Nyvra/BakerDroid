@@ -31,20 +31,21 @@ public class BakerDroidView extends ViewPager {
 	private Context mContext;
 	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
-	SparseArray<View> mWebViews;
+	private SparseArray<View> mViews;
+	private OnHPubLoadedListener mListener;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mContext = context;
 		mPager = this;
-		mWebViews = new SparseArray<View>();
+		mViews = new SparseArray<View>();
 	}
 	
 	public BakerDroidView(Context context) {
 		super(context);
 		mContext = context;
 		mPager = this;
-		mWebViews = new SparseArray<View>();
+		mViews = new SparseArray<View>();
 	}
 
 	public HPubDocument getDocument() {
@@ -70,16 +71,23 @@ public class BakerDroidView extends ViewPager {
 				setAdapter(adapter);
 				setOffscreenPageLimit(1);
 				setCurrentItem(initialPage);
+				if (mListener != null) {
+					mListener.onHPubLoaded();
+				}
 			};
 			
 		}.execute();
 		
 	}
 	
+	public void setOnHpubLoadedListener(OnHPubLoadedListener listener) {
+		mListener = listener;
+	}
+	
 	public void persistCurrentItemsScrolling() {
-		for (int i = 0; i < mWebViews.size(); i++) {
-			int key = mWebViews.keyAt(i);
-			View value = mWebViews.get(key);
+		for (int i = 0; i < mViews.size(); i++) {
+			int key = mViews.keyAt(i);
+			View value = mViews.get(key);
 			WebView webView = (WebView) value.findViewById(R.id.webview);
 			int scrollY = webView.getScrollY();
 			mScrollYPositions[key] = scrollY;
@@ -148,7 +156,7 @@ public class BakerDroidView extends ViewPager {
 			webView.setTag(progress);
 			
 			container.addView(view);
-			mWebViews.put(position, view);
+			mViews.put(position, view);
 			return view;
 		}
 		
@@ -157,7 +165,7 @@ public class BakerDroidView extends ViewPager {
 			int scrollY = ((View) object).findViewById(R.id.webview).getScrollY();
 			mScrollYPositions[position] = scrollY;
 			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {position, scrollY}));
-			mWebViews.remove(position);
+			mViews.remove(position);
 			container.removeView((View) object);
 		}
 
@@ -220,6 +228,10 @@ public class BakerDroidView extends ViewPager {
 	
 	private class BakerWebChromeClient extends WebChromeClient {
 		
+	}
+	
+	public interface OnHPubLoadedListener {
+		public void onHPubLoaded();
 	}
 
 }
