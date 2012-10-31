@@ -255,7 +255,7 @@ public class BakerDroidView extends ViewPager {
 					try {
 						FileOutputStream fos = new FileOutputStream(mDocument.getPathAtPosition(position));
 						BufferedOutputStream bos = new BufferedOutputStream(fos);
-						bos.write(mDocument.getContent().get(position).getBytes());
+						bos.write(html.getBytes());
 						bos.close();
 						fos.close();
 					} catch (FileNotFoundException e) {
