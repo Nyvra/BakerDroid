@@ -1,6 +1,10 @@
 package net.nyvra.bakerdroid;
 
-import net.nyvra.bakerdroid.R;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,6 +15,7 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,6 +28,7 @@ import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+//import android.util.Log;
 
 public class BakerDroidView extends ViewPager {
 	private HPubDocument mDocument;
@@ -106,8 +112,8 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	class BakerDroidAdapter extends PagerAdapter {
-		BakerWebViewClient mWebViewCLient;
-		BakerWebChromeClient mWebChromeClient;
+		BakerWebViewClient webViewCLient;
+		BakerWebChromeClient webChromeClient;
 		
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
@@ -127,15 +133,17 @@ public class BakerDroidView extends ViewPager {
 			webView.getSettings().setCacheMode(WebSettings.LOAD_NORMAL);
 			webView.setInitialScale(1);
 			
-			if (mWebViewCLient == null) {
-				mWebViewCLient = new BakerWebViewClient();
+			if (webViewCLient == null) {
+				webViewCLient = new BakerWebViewClient();
 			}
-			webView.setWebViewClient(mWebViewCLient);
+			webView.setWebViewClient(webViewCLient);
 			
-			if (mWebChromeClient == null) {
-				mWebChromeClient = new BakerWebChromeClient();
+			if (webChromeClient == null) {
+				webChromeClient = new BakerWebChromeClient();
 			}
-			webView.setWebChromeClient(mWebChromeClient);
+			webView.setWebChromeClient(webChromeClient);
+			webView.addJavascriptInterface(new GetHTMLJavascriptInterface(position), "HTMLOUT");
+			
 			webView.setOnTouchListener(new OnTouchListener() {
 				
 				@Override
@@ -163,6 +171,10 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
 			mCurrentViews.remove(position);
+			if (BakerDroidConfigs.shouldOvewriteContentIfChanged()) {
+				WebView webView = (WebView) ((View) object).findViewById(R.id.webview);
+				webView.loadUrl("javascript:HTMLOUT.getHTML('<html>' + document.getElementsByTagName('html')[0].innerHTML + '</html>');");
+			}
 			container.removeView((View) object);
 		}
 
@@ -226,6 +238,35 @@ public class BakerDroidView extends ViewPager {
 	
 	private class BakerWebChromeClient extends WebChromeClient {
 		
+	}
+	
+	class GetHTMLJavascriptInterface {
+		int position;
+		
+		public GetHTMLJavascriptInterface(int position) {
+			this.position = position;
+		}
+		
+		public void getHTML(final String html) {
+			new Thread() {
+				
+				@Override
+				public void run() {
+					try {
+						FileOutputStream fos = new FileOutputStream(mDocument.getPathAtPosition(position));
+						BufferedOutputStream bos = new BufferedOutputStream(fos);
+						bos.write(mDocument.getContent().get(position).getBytes());
+						bos.close();
+						fos.close();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}.start();
+		}
 	}
 	
 	public interface OnHPubLoadedListener {
