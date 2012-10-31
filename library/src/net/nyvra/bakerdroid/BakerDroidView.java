@@ -11,7 +11,6 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,36 +25,38 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 public class BakerDroidView extends ViewPager {
-	private static final String TAG = BakerDroidView.class.getSimpleName();
-	
 	private HPubDocument mDocument;
 	private Context mContext;
-	private int[] mScrollYPositions;
 	private BakerDroidView mPager;
-	private SparseArray<View> mViews;
 	private OnHPubLoadedListener mListener;
 	private OnDoubleTapListener mDoubleTapListener;
 	private long mLastTouchTime = -1;
+	private int mInitialPage;
+	private int mCurrentItemScrolling;
+	private SparseArray<View> mCurrentViews;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		mContext = context;
 		mPager = this;
-		mViews = new SparseArray<View>();
+		mCurrentViews = new SparseArray<View>();
 	}
 	
 	public BakerDroidView(Context context) {
 		super(context);
 		mContext = context;
 		mPager = this;
-		mViews = new SparseArray<View>();
+		mCurrentViews = new SparseArray<View>();
 	}
 
 	public HPubDocument getDocument() {
 		return mDocument;
 	}
 
-	public void loadDocument(final String pathToBook, final int[] scrollPositions, final int initialPage) {
+	public void loadDocument(final String pathToBook, int initialPage, int currentItemScrolling) {
+		mInitialPage = initialPage;
+		mCurrentItemScrolling = currentItemScrolling;
+		
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -65,15 +66,9 @@ public class BakerDroidView extends ViewPager {
 			}
 			
 			protected void onPostExecute(Void result) {
-				BakerDroidAdapter adapter = null;
-				if (scrollPositions == null) {
-					adapter = new BakerDroidAdapter();
-				} else {
-					adapter = new BakerDroidAdapter(scrollPositions);
-				}
-				setAdapter(adapter);
+				setAdapter(new BakerDroidAdapter());
 				setOffscreenPageLimit(1);
-				setCurrentItem(initialPage);
+				setCurrentItem(mInitialPage);
 				if (mListener != null) {
 					mListener.onHPubLoaded();
 				}
@@ -91,23 +86,13 @@ public class BakerDroidView extends ViewPager {
 		mDoubleTapListener = l;
 	}
 	
-	public void persistCurrentItemsScrolling() {
-		for (int i = 0; i < mViews.size(); i++) {
-			int key = mViews.keyAt(i);
-			View value = mViews.get(key);
-			WebView webView = (WebView) value.findViewById(R.id.webview);
-			int scrollY = webView.getScrollY();
-			mScrollYPositions[key] = scrollY;
-			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {key, scrollY}));
+	public int getCurrentItemScrolling() {
+		View view = mCurrentViews.get(getCurrentItem(), null);
+		if (view != null) {
+			WebView webView = (WebView) view.findViewById(R.id.webview);
+			return webView.getScrollY();
 		}
-	}
-	
-	public int[] getScrollPositions() {
-		return mScrollYPositions;
-	}
-	
-	public int getCurrentItemScrollPosition() {
-		return mScrollYPositions[getCurrentItem()];
+		return -1;
 	}
 	
 	@Override
@@ -123,14 +108,6 @@ public class BakerDroidView extends ViewPager {
 	class BakerDroidAdapter extends PagerAdapter {
 		BakerWebViewClient mWebViewCLient;
 		BakerWebChromeClient mWebChromeClient;
-		
-		public BakerDroidAdapter() {
-			mScrollYPositions = new int[mDocument.getContent().size()];
-		}
-		
-		public BakerDroidAdapter(int[] savedScrollPositions) {
-			mScrollYPositions = savedScrollPositions;
-		}
 		
 		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
@@ -178,18 +155,14 @@ public class BakerDroidView extends ViewPager {
 			});
 			ProgressBar progress = (ProgressBar) view.findViewById(R.id.progressbar);
 			webView.setTag(progress);
-			
+			mCurrentViews.put(position, view);
 			container.addView(view);
-			mViews.put(position, view);
 			return view;
 		}
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
-			int scrollY = ((View) object).findViewById(R.id.webview).getScrollY();
-			mScrollYPositions[position] = scrollY;
-			Log.d(TAG, String.format("Caching: Position: %d; Scroll: %d", new Object[] {position, scrollY}));
-			mViews.remove(position);
+			mCurrentViews.remove(position);
 			container.removeView((View) object);
 		}
 
@@ -206,6 +179,7 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebViewClient extends WebViewClient {
+		boolean alreadyLoaded = false;
 		
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -222,11 +196,11 @@ public class BakerDroidView extends ViewPager {
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
 			int position = mDocument.getPositionFromPage(url);
-			if (position != -1) {
-				int scrollY = mScrollYPositions[position];
-				if (scrollY > 0) {
+			if (position == mInitialPage) {
+				if (!alreadyLoaded && mCurrentItemScrolling > 0) {
+					alreadyLoaded = true;
 			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
-			        sb.append(scrollY);
+			        sb.append(mCurrentItemScrolling);
 			        sb.append("/ window.devicePixelRatio);");
 			        view.loadUrl(sb.toString());
 			    }
