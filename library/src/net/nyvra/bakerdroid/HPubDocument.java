@@ -59,7 +59,7 @@ public class HPubDocument {
 		char[] buffer = new char[1024];
 		try {
 			InputStream input;
-			if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+			if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
 				AssetManager assetManager = context.getAssets();
 				input = assetManager.open(path.concat("/book.json"));
 			} else {
@@ -187,11 +187,25 @@ public class HPubDocument {
 	}
 	
 	public String getUrlAtPosition(int position) {
-		if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
+		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
 			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
 		} else {
 			return String.format("file://%s/%s", new Object[] {mPath, mContent.get(position)});
 		}
+	}
+	
+	public String getFullURL(String pageName) {
+		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
+			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
+		} else {
+			String str = String.format("file://%s/%s", new Object[] {mPath, pageName});
+			Log.d("tag", str);
+			return str;
+		}
+	}
+	
+	public String getPathAtPosition(int position) {
+		return mPath + "/" + this.getContent().get(position);
 	}
 	
 	public int getPositionFromPage(String pageName) {
@@ -201,16 +215,6 @@ public class HPubDocument {
 			}
 		}
 		return -1;
-	}
-	
-	public String getFullURL(String pageName) {
-		if (BakerDroidConfigs.sStorageMode == StorageMode.STORAGE_ASSETS_FOLDER) {
-			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
-		} else {
-			String str = String.format("file://%s/%s", new Object[] {mPath, pageName});
-			Log.d("tag", str);
-			return str;
-		}
 	}
 
 }
