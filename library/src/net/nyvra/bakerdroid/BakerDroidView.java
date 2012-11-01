@@ -228,6 +228,17 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebChromeClient extends WebChromeClient {
+		
+		@Override
+		public void onShowCustomView(View view, CustomViewCallback callback) {
+			super.onShowCustomView(view, callback);
+		}
+		
+		@Override
+		public void onHideCustomView() {
+			super.onHideCustomView();
+		}
+		
 		@Override
 	    public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
 	        long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
