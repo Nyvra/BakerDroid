@@ -190,7 +190,7 @@ public class HPubDocument {
 		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
 			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
 		} else {
-			return String.format("file://%s/%s", new Object[] {mPath, mContent.get(position)});
+			return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position)});
 		}
 	}
 	
@@ -198,7 +198,7 @@ public class HPubDocument {
 		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
 			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
 		} else {
-			String str = String.format("file://%s/%s", new Object[] {mPath, pageName});
+			String str = String.format("file:///%s/%s", new Object[] {mPath, pageName});
 			Log.d("tag", str);
 			return str;
 		}
