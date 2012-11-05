@@ -21,6 +21,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
+/**
+ * BakerDroid is the Android implementation of the the Baker framework HPub specification.
+ * BakerDroidView overrides ViewPager and offers methods to easily read ebooks. It should be used as an Android widget.
+ *
+ */
 public class BakerDroidView extends ViewPager {
 	private HPubDocument mDocument;
 	private Context mContext;
@@ -49,7 +54,19 @@ public class BakerDroidView extends ViewPager {
 	public HPubDocument getDocument() {
 		return mDocument;
 	}
+	
+	public WebView getCurrentPageWebView() {
+	    WebView view = (WebView)mCurrentViews.get(getCurrentItem()).findViewById(R.id.webview);
+	    return view;
+	}
 
+	/**
+	 * Load the document, showing its content when finished.
+	 * 
+	 * @param pathToBook The path where the document is stored
+	 * @param initialPage The page that will be showed when the document is loaded
+	 * @param currentItemScrolling The Y scroll position of the initial page
+	 */
 	public void loadDocument(final String pathToBook, int initialPage, int currentItemScrolling) {
 		mInitialPage = initialPage;
 		mCurrentItemScrolling = currentItemScrolling;
@@ -102,6 +119,12 @@ public class BakerDroidView extends ViewPager {
 		super.onRestoreInstanceState(state);
 	}
 	
+	/**
+	 * BakerDroidView Adapter
+	 * 
+	 * @author angelocastelanjr
+	 *
+	 */
 	class BakerDroidAdapter extends PagerAdapter {
 		BakerWebViewClient webViewCLient;
 		BakerWebChromeClient webChromeClient;
