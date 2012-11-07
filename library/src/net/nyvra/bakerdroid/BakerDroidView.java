@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
@@ -31,8 +30,6 @@ public class BakerDroidView extends ViewPager {
 	private Context mContext;
 	private BakerDroidView mPager;
 	private OnHPubLoadedListener mListener;
-	private OnDoubleTapListener mDoubleTapListener;
-	private long mLastTouchTime = -1;
 	private int mInitialPage;
 	private int mCurrentItemScrolling;
 	private SparseArray<View> mCurrentViews;
@@ -96,10 +93,6 @@ public class BakerDroidView extends ViewPager {
 		mListener = listener;
 	}
 	
-	public void setOnDoubleTapListener(OnDoubleTapListener l) {
-		mDoubleTapListener = l;
-	}
-	
 	public int getCurrentItemScrolling() {
 		View view = mCurrentViews.get(getCurrentItem(), null);
 		if (view != null) {
@@ -157,24 +150,6 @@ public class BakerDroidView extends ViewPager {
 				webChromeClient = new BakerWebChromeClient();
 			}
 			webView.setWebChromeClient(webChromeClient);
-			
-			webView.setOnTouchListener(new OnTouchListener() {
-				
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					if (event.getAction() == MotionEvent.ACTION_DOWN) {
-						long thisTime = System.currentTimeMillis();
-						
-						if (thisTime - mLastTouchTime < 250) {
-							mDoubleTapListener.onDoubleTap();
-							mLastTouchTime = -1;
-						} else {
-							mLastTouchTime = thisTime;
-						}
-					}
-					return false;
-				}
-			});
 			
 			webView.loadUrl(mDocument.getUrlAtPosition(position));
 			
@@ -272,10 +247,6 @@ public class BakerDroidView extends ViewPager {
 	public interface OnHPubLoadedListener {
 		public void onHPubLoaded();
 		public void onPageLoaded(int position, WebView view);
-	}
-	
-	public interface OnDoubleTapListener {
-		public void onDoubleTap();
 	}
 
 }
