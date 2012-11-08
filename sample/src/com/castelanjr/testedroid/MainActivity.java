@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         mBaker = (BakerDroidView) findViewById(R.id.baker);
-        mBaker.loadDocument("book", null, 0);
+        mBaker.loadDocument("book", 0, 0);
     }
 
     @Override
