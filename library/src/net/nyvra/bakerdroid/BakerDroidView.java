@@ -1,11 +1,14 @@
 package net.nyvra.bakerdroid;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -33,6 +36,7 @@ public class BakerDroidView extends ViewPager {
 	private int mInitialPage;
 	private int mCurrentItemScrolling;
 	private SparseArray<View> mCurrentViews;
+	private HashMap<Object, String> mJavascriptInterfaces;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -102,14 +106,15 @@ public class BakerDroidView extends ViewPager {
 		return -1;
 	}
 	
-	@Override
-	public Parcelable onSaveInstanceState() {
-		return super.onSaveInstanceState();
+	public void setJavascriptInterfaces(HashMap<Object, String> interfaces) {
+	    mJavascriptInterfaces = interfaces;
 	}
 	
-	@Override
-	public void onRestoreInstanceState(Parcelable state) {
-		super.onRestoreInstanceState(state);
+	public void addJavascriptInterface(Object jsInterface, String name) {
+	    if (mJavascriptInterfaces == null) {
+	        mJavascriptInterfaces = new HashMap<Object, String>();
+	    }
+	    mJavascriptInterfaces.put(jsInterface, name);
 	}
 	
 	/**
@@ -150,6 +155,12 @@ public class BakerDroidView extends ViewPager {
 				webChromeClient = new BakerWebChromeClient();
 			}
 			webView.setWebChromeClient(webChromeClient);
+			
+			if (mJavascriptInterfaces != null) {
+    			for (Object obj : mJavascriptInterfaces.keySet()) {
+    			    webView.addJavascriptInterface(obj, mJavascriptInterfaces.get(obj));
+    			}
+			}
 			
 			webView.loadUrl(mDocument.getUrlAtPosition(position));
 			
