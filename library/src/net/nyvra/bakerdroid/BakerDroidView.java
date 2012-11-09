@@ -1,8 +1,6 @@
 package net.nyvra.bakerdroid;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -32,7 +30,7 @@ public class BakerDroidView extends ViewPager {
 	private HPubDocument mDocument;
 	private Context mContext;
 	private BakerDroidView mPager;
-	private OnHPubLoadedListener mListener;
+	private HPubListener mListener;
 	private int mInitialPage;
 	private int mCurrentItemScrolling;
 	private SparseArray<View> mCurrentViews;
@@ -93,7 +91,7 @@ public class BakerDroidView extends ViewPager {
 		
 	}
 	
-	public void setOnHpubLoadedListener(OnHPubLoadedListener listener) {
+	public void setOnHpubLoadedListener(HPubListener listener) {
 		mListener = listener;
 	}
 	
@@ -173,6 +171,9 @@ public class BakerDroidView extends ViewPager {
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
+		    if (mListener != null) {
+                mListener.onPageDestroyed(position, (WebView) ((View) object).findViewById(R.id.webview));
+            }
 			mCurrentViews.remove(position);
 			((ViewPager) container).removeView((View) object);
 		}
@@ -216,7 +217,9 @@ public class BakerDroidView extends ViewPager {
 			        view.loadUrl(sb.toString());
 			    }
 			}
-			mListener.onPageLoaded(position, view);
+			if (mListener != null) {
+			    mListener.onPageLoaded(position, view);
+			}
 			ProgressBar progress = (ProgressBar) view.getTag();
 			if (progress != null) {
 				view.setVisibility(View.VISIBLE);
@@ -255,9 +258,10 @@ public class BakerDroidView extends ViewPager {
 	    }
 	}
 	
-	public interface OnHPubLoadedListener {
+	public interface HPubListener {
 		public void onHPubLoaded();
 		public void onPageLoaded(int position, WebView view);
+		public void onPageDestroyed(int position, WebView view);
 	}
 
 }
