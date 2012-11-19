@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings.LayoutAlgorithm;
+import android.webkit.JsResult;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -240,6 +241,12 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	private class BakerWebChromeClient extends WebChromeClient {
+	    
+	    @Override
+	    public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+	        result.confirm();
+            return true;
+	    }
 		
 		@Override
 		public void onShowCustomView(View view, CustomViewCallback callback) {
