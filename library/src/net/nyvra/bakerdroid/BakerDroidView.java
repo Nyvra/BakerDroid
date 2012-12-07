@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -14,13 +13,16 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebChromeClient.CustomViewCallback;
+import android.webkit.WebSettings.LayoutAlgorithm;
+import android.webkit.WebSettings.PluginState;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+//import android.os.Build;
 
 /**
  * BakerDroid is the Android implementation of the the Baker framework HPub specification.
@@ -132,27 +134,23 @@ public class BakerDroidView extends ViewPager {
 			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
 			WebView webView = (WebView) view.findViewById(R.id.webview);
 			webView.getSettings().setBuiltInZoomControls(true);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				webView.getSettings().setDisplayZoomControls(false);
-			}
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//				webView.getSettings().setDisplayZoomControls(false);
+//			}
 			webView.getSettings().setJavaScriptEnabled(true);
 			webView.getSettings().setDatabaseEnabled(true);
 			webView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
 			webView.getSettings().setDomStorageEnabled(true);
-			
 			webView.getSettings().setLoadWithOverviewMode(true);
 			webView.getSettings().setUseWideViewPort(true);
 			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
 			webView.setInitialScale(1);
+			webView.getSettings().setPluginState(PluginState.ON);
 			
-			if (webViewCLient == null) {
-				webViewCLient = new BakerWebViewClient();
-			}
+			webViewCLient = new BakerWebViewClient();
 			webView.setWebViewClient(webViewCLient);
 			
-			if (webChromeClient == null) {
-				webChromeClient = new BakerWebChromeClient();
-			}
+			webChromeClient = new BakerWebChromeClient();
 			webView.setWebChromeClient(webChromeClient);
 			
 			if (mJavascriptInterfaces != null) {
@@ -251,11 +249,13 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onShowCustomView(View view, CustomViewCallback callback) {
 			super.onShowCustomView(view, callback);
+			mListener.onShowCustomView(view, callback);
 		}
 		
 		@Override
 		public void onHideCustomView() {
 			super.onHideCustomView();
+			mListener.onHideCustomView();
 		}
 		
 		@Override
@@ -269,6 +269,8 @@ public class BakerDroidView extends ViewPager {
 		public void onHPubLoaded();
 		public void onPageLoaded(int position, WebView view);
 		public void onPageDestroyed(int position, WebView view);
+		public void onShowCustomView(View view, CustomViewCallback callback);
+		public void onHideCustomView();
 	}
 
 }
