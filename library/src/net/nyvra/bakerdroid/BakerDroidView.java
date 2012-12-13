@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
@@ -58,8 +59,12 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	public WebView getCurrentPageWebView() {
-	    WebView view = (WebView)mCurrentViews.get(getCurrentItem()).findViewById(R.id.webview);
-	    return view;
+	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem()) != null) {
+	        WebView view = (WebView) mCurrentViews.get(getCurrentItem()).findViewById(R.id.webview);
+	        return view;
+	    } else {
+	        return null;
+	    }
 	}
 
 	/**
@@ -144,8 +149,8 @@ public class BakerDroidView extends ViewPager {
 			webView.getSettings().setLoadWithOverviewMode(true);
 			webView.getSettings().setUseWideViewPort(true);
 			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-			webView.setInitialScale(1);
 			webView.getSettings().setPluginState(PluginState.ON);
+			webView.setInitialScale(1);
 			
 			webViewCLient = new BakerWebViewClient();
 			webView.setWebViewClient(webViewCLient);
@@ -206,6 +211,19 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
+			new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    SharedPreferences prefs = mContext.getSharedPreferences("WebViewSettings", Context.MODE_PRIVATE);
+                    if (prefs.getInt("double_tap_toast_count", 1) > 0) {
+                        prefs.edit().putInt("double_tap_toast_count", 0).commit();
+                    }
+                    return null;
+                }
+			    
+			}.execute();
+			
 			int position = mDocument.getPositionFromPage(url);
 			if (position == mInitialPage) {
 				if (!alreadyLoaded && mCurrentItemScrolling > 0) {
