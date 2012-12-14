@@ -11,15 +11,12 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.nyvra.bakerdroid.BakerDroidConfigs.StorageMode;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Log;
 
 public class HPubDocument {
 	//Required Parameters
@@ -51,15 +48,18 @@ public class HPubDocument {
 	private String mCover;
 	private String mFile;
 	private List<DocumentSetting> mSettings;
+	private BakerDroidView.StorageMode mStorageMode;
 	
-	public HPubDocument(Context context, String path) {
+	public HPubDocument(Context context, String path, BakerDroidView.StorageMode storageMode) {
+	    mStorageMode = storageMode;
+	    
 		Writer writer = null;
 			
 		writer = new StringWriter();
 		char[] buffer = new char[1024];
 		try {
 			InputStream input;
-			if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
+			if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
 				AssetManager assetManager = context.getAssets();
 				input = assetManager.open(path.concat("/book.json"));
 			} else {
@@ -187,7 +187,7 @@ public class HPubDocument {
 	}
 	
 	public String getUrlAtPosition(int position) {
-		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
+		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
 			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
 		} else {
 			return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position)});
@@ -195,11 +195,10 @@ public class HPubDocument {
 	}
 	
 	public String getFullURL(String pageName) {
-		if (BakerDroidConfigs.getStorageMode() == StorageMode.STORAGE_ASSETS_FOLDER) {
+		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
 			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
 		} else {
 			String str = String.format("file:///%s/%s", new Object[] {mPath, pageName});
-			Log.d("tag", str);
 			return str;
 		}
 	}

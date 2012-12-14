@@ -23,7 +23,6 @@ import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-//import android.os.Build;
 
 /**
  * BakerDroid is the Android implementation of the the Baker framework HPub specification.
@@ -71,6 +70,25 @@ public class BakerDroidView extends ViewPager {
 	 * A HashMap of the javascript interfaces that will be added to the WebViews
 	 */
 	private HashMap<Object, String> mJavascriptInterfaces;
+	
+	/**
+     * An enum used to indicate the storage mode: assets folder or external storage.
+     *
+     */
+    public enum StorageMode {STORAGE_ASSETS_FOLDER, STORAGE_EXTERNAL}
+    
+    /**
+     *  The storage mode
+     */
+    private StorageMode mStorageMode = StorageMode.STORAGE_ASSETS_FOLDER;
+    
+    public StorageMode getStorageMode() {
+        return mStorageMode;
+    }
+    
+    public void setStorageMode(StorageMode storageMode) {
+        mStorageMode = storageMode;
+    }
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -124,7 +142,7 @@ public class BakerDroidView extends ViewPager {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				mDocument = new HPubDocument(mContext, pathToBook);
+				mDocument = new HPubDocument(mContext, pathToBook, mStorageMode);
 				return null;
 			}
 			
@@ -346,16 +364,45 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	/**
-	 * BakerDroidView default listener.
+	 * BakerDroidView default listener to dispatch events
 	 * 
 	 * @author castelanjr
 	 *
 	 */
 	public interface HPubListener {
+	    
+	    /**
+	     * Event dispatched when the HPub is loaded
+	     */
 		public void onHPubLoaded();
+		
+		/**
+		 * Event dispatched when the page is completely loaded
+		 * 
+		 * @param position the page position
+		 * @param view the WebView of the page
+		 */
 		public void onPageLoaded(int position, WebView view);
+		
+		/**
+		 * Event dispatched when the page is destroyed
+		 * 
+		 * @param position the page position
+		 * @param view the WebView of the page
+		 */
 		public void onPageDestroyed(int position, WebView view);
+		
+		/**
+		 * Notify the host application that the current page would like to show a custom View.
+		 * 
+		 * @param view is the view to be shown
+		 * @param callback the callback
+		 */
 		public void onShowCustomView(View view, CustomViewCallback callback);
+		
+		/**
+		 * Notify the host application that the current page would like to hide the custom View.
+		 */
 		public void onHideCustomView();
 	}
 
