@@ -31,13 +31,45 @@ import android.widget.ProgressBar;
  *
  */
 public class BakerDroidView extends ViewPager {
+    
+    /**
+     * The HPub document being showed.
+     */
 	private HPubDocument mDocument;
+	
+	/**
+	 * The activity context.
+	 */
 	private Context mContext;
+	
+	/**
+	 * A BakerDroidView reference to itself
+	 */
 	private BakerDroidView mPager;
+	
+	/**
+	 * Listener used to dispatch HPub events
+	 */
 	private HPubListener mListener;
+	
+	/**
+	 * Indicates the page which should be displayed first when the HPub is opened
+	 */
 	private int mInitialPage;
+	
+	/**
+	 * Indicates the scrolling of the current page being displayed
+	 */
 	private int mCurrentItemScrolling;
+	
+	/**
+	 * A reference to the three views being displayed in the ViewPager
+	 */
 	private SparseArray<View> mCurrentViews;
+	
+	/**
+	 * A HashMap of the javascript interfaces that will be added to the WebViews
+	 */
 	private HashMap<Object, String> mJavascriptInterfaces;
 
 	public BakerDroidView(Context context, AttributeSet attrs) {
@@ -54,10 +86,20 @@ public class BakerDroidView extends ViewPager {
 		mCurrentViews = new SparseArray<View>();
 	}
 
+	/**
+	 * The method used to get the document being showed in BakerDroidView
+	 * 
+	 * @return The current document
+	 */
 	public HPubDocument getDocument() {
 		return mDocument;
 	}
 	
+	/**
+	 * The method used to get the current WebView
+	 * 
+	 * @return The current page WebView.
+	 */
 	public WebView getCurrentPageWebView() {
 	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem()) != null) {
 	        WebView view = (WebView) mCurrentViews.get(getCurrentItem()).findViewById(R.id.webview);
@@ -99,10 +141,19 @@ public class BakerDroidView extends ViewPager {
 		
 	}
 	
-	public void setOnHpubLoadedListener(HPubListener listener) {
+	/**
+	 * Set the HPubListener
+	 * 
+	 * @param listener
+	 */
+	public void setHpubListener(HPubListener listener) {
 		mListener = listener;
 	}
 	
+	/**
+	 * 
+	 * @return The current page Y scrolling
+	 */
 	public int getCurrentItemScrolling() {
 		View view = mCurrentViews.get(getCurrentItem(), null);
 		if (view != null) {
@@ -112,10 +163,12 @@ public class BakerDroidView extends ViewPager {
 		return -1;
 	}
 	
-	public void setJavascriptInterfaces(HashMap<Object, String> interfaces) {
-	    mJavascriptInterfaces = interfaces;
-	}
-	
+	/**
+	 * Method used to add a Javascript interface to be added to the WebViews
+	 * 
+	 * @param jsInterface The interface object
+	 * @param name The interface name
+	 */
 	public void addJavascriptInterface(Object jsInterface, String name) {
 	    if (mJavascriptInterfaces == null) {
 	        mJavascriptInterfaces = new HashMap<Object, String>();
@@ -124,9 +177,18 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	/**
+	 * Used to set a HashMap of JS interfaces
+	 * 
+	 * @param interfaces A HashMap with the interface objects and their names
+	 */
+	public void setJavascriptInterfaces(HashMap<Object, String> interfaces) {
+        mJavascriptInterfaces = interfaces;
+    }
+	
+	/**
 	 * BakerDroidView Adapter
 	 * 
-	 * @author angelocastelanjr
+	 * @author castelanjr
 	 *
 	 */
 	class BakerDroidAdapter extends PagerAdapter {
@@ -138,7 +200,7 @@ public class BakerDroidView extends ViewPager {
 		public Object instantiateItem(ViewGroup container, int position) {
 			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
 			WebView webView = (WebView) view.findViewById(R.id.webview);
-			webView.getSettings().setBuiltInZoomControls(true);
+			webView.getSettings().setBuiltInZoomControls(false);
 //			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 //				webView.getSettings().setDisplayZoomControls(false);
 //			}
@@ -283,6 +345,12 @@ public class BakerDroidView extends ViewPager {
 	    }
 	}
 	
+	/**
+	 * BakerDroidView default listener.
+	 * 
+	 * @author castelanjr
+	 *
+	 */
 	public interface HPubListener {
 		public void onHPubLoaded();
 		public void onPageLoaded(int position, WebView view);
