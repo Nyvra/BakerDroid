@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebChromeClient.CustomViewCallback;
+import android.webkit.WebSettings;
 import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebStorage;
@@ -81,6 +82,8 @@ public class BakerDroidView extends ViewPager {
      *  The storage mode
      */
     private StorageMode mStorageMode = StorageMode.STORAGE_ASSETS_FOLDER;
+    
+    private boolean mToastSupressed = false;
     
     public StorageMode getStorageMode() {
         return mStorageMode;
@@ -226,6 +229,8 @@ public class BakerDroidView extends ViewPager {
 			webView.getSettings().setDatabaseEnabled(true);
 			webView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
 			webView.getSettings().setDomStorageEnabled(true);
+			webView.getSettings();
+            webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 			webView.getSettings().setLoadWithOverviewMode(true);
 			webView.getSettings().setUseWideViewPort(true);
 			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
@@ -260,6 +265,7 @@ public class BakerDroidView extends ViewPager {
             }
 			mCurrentViews.remove(position);
 			((ViewPager) container).removeView((View) object);
+			object = null;
 		}
 
 		@Override
@@ -291,18 +297,20 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
-			new AsyncTask<Void, Void, Void>() {
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    SharedPreferences prefs = mContext.getSharedPreferences("WebViewSettings", Context.MODE_PRIVATE);
-                    if (prefs.getInt("double_tap_toast_count", 1) > 0) {
-                        prefs.edit().putInt("double_tap_toast_count", 0).commit();
+			if (!mToastSupressed) {
+    			new Thread(new Runnable() {
+    
+                    @Override
+                    public void run() {
+                        SharedPreferences prefs = mContext.getSharedPreferences("WebViewSettings", Context.MODE_PRIVATE);
+                        if (prefs.getInt("double_tap_toast_count", 1) > 0) {
+                            prefs.edit().putInt("double_tap_toast_count", 0).commit();
+                        }
                     }
-                    return null;
-                }
-			    
-			}.execute();
+    			    
+    			}).start();
+    			mToastSupressed = true;
+			}
 			
 			int position = mDocument.getPositionFromPage(url);
 			if (position == mInitialPage) {
