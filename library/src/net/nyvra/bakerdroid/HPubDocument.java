@@ -34,6 +34,10 @@ public class HPubDocument {
 	public static final String P_ZOOMABLE = "zoomable";
 	public static final String P_COVER = "cover";
 	
+	//Settings
+	public static final String P_BAKER_BACKGROUND_PORTRAIT = "-baker-background-image-portrait";
+	public static final String P_BAKER_BACKGROUND_LANDSCAPE = "-baker-background-image-landscape";
+	
 	private String mPath;
 	private String mTitle;
 	private String[] mAuthor;
@@ -49,6 +53,7 @@ public class HPubDocument {
 	private String mFile;
 	private List<DocumentSetting> mSettings;
 	private BakerDroidView.StorageMode mStorageMode;
+	private String mBackgroundPortrait, mBackgroundLandscape;
 	
 	public HPubDocument(Context context, String path, BakerDroidView.StorageMode storageMode) {
 	    mStorageMode = storageMode;
@@ -123,6 +128,14 @@ public class HPubDocument {
 			
 			if (object.has(P_COVER)) {
 				this.mCover = object.getString(P_COVER);
+			}
+			
+			if (object.has(P_BAKER_BACKGROUND_LANDSCAPE)) {
+			    this.setBackgroundLandscape(object.getString(P_BAKER_BACKGROUND_LANDSCAPE));
+			}
+			
+			if (object.has(P_BAKER_BACKGROUND_PORTRAIT)) {
+			    this.setBackgroundPortrait(object.getString(P_BAKER_BACKGROUND_PORTRAIT));
 			}
 			
 		} catch (JSONException e) {
@@ -215,5 +228,21 @@ public class HPubDocument {
 		}
 		return -1;
 	}
+
+    public String getBackgroundPortrait() {
+        return mBackgroundPortrait;
+    }
+
+    public void setBackgroundPortrait(String mBackgroundPortrait) {
+        this.mBackgroundPortrait = mBackgroundPortrait;
+    }
+
+    public String getBackgroundLandscape() {
+        return mBackgroundLandscape;
+    }
+
+    public void setBackgroundLandscape(String mBackgroundLandscape) {
+        this.mBackgroundLandscape = mBackgroundLandscape;
+    }
 
 }

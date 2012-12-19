@@ -5,8 +5,11 @@ import java.util.HashMap;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -24,6 +27,7 @@ import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 /**
  * BakerDroid is the Android implementation of the the Baker framework HPub specification.
@@ -216,10 +220,27 @@ public class BakerDroidView extends ViewPager {
 		BakerWebViewClient webViewCLient;
 		BakerWebChromeClient webChromeClient;
 		
-		@SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
+		@SuppressWarnings("deprecation")
+        @SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
 			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
+			RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.layout);
+			
+			Drawable drawable;
+			if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			    drawable = Drawable.createFromPath(mDocument.getPath() + "/" + mDocument.getBackgroundLandscape());
+			} else {
+			    drawable = Drawable.createFromPath(mDocument.getPath() + "/" + mDocument.getBackgroundPortrait());
+			}
+			
+			if (Build.VERSION.SDK_INT >= 16) {
+			    layout.setBackground(drawable);
+			} else {
+			    layout.setBackgroundDrawable(drawable);
+			}
+			
+			
 			WebView webView = (WebView) view.findViewById(R.id.webview);
 			webView.getSettings().setBuiltInZoomControls(false);
 //			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -229,7 +250,6 @@ public class BakerDroidView extends ViewPager {
 			webView.getSettings().setDatabaseEnabled(true);
 			webView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
 			webView.getSettings().setDomStorageEnabled(true);
-			webView.getSettings();
             webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 			webView.getSettings().setLoadWithOverviewMode(true);
 			webView.getSettings().setUseWideViewPort(true);
