@@ -3,17 +3,24 @@ package net.nyvra.bakerdroid;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,6 +95,7 @@ public class BakerDroidView extends ViewPager {
     private StorageMode mStorageMode = StorageMode.STORAGE_ASSETS_FOLDER;
     
     private boolean mToastSupressed = false;
+    private Drawable mBackground;
     
     public StorageMode getStorageMode() {
         return mStorageMode;
@@ -133,6 +141,24 @@ public class BakerDroidView extends ViewPager {
 	        return null;
 	    }
 	}
+	
+	public WebView getNextPageWebView() {
+	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem() + 1) != null) {
+            WebView view = (WebView) mCurrentViews.get(getCurrentItem() + 1).findViewById(R.id.webview);
+            return view;
+        } else {
+            return null;
+        }
+	}
+	
+	public WebView getPreviousPageWebView() {
+	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem() - 1) != null) {
+            WebView view = (WebView) mCurrentViews.get(getCurrentItem() - 1).findViewById(R.id.webview);
+            return view;
+        } else {
+            return null;
+        }
+	}
 
 	/**
 	 * Load the document, showing its content when finished.
@@ -147,9 +173,39 @@ public class BakerDroidView extends ViewPager {
 		
 		new AsyncTask<Void, Void, Void>() {
 
-			@Override
+			@SuppressLint("NewApi")
+            @SuppressWarnings("deprecation")
+            @Override
 			protected Void doInBackground(Void... params) {
 				mDocument = new HPubDocument(mContext, pathToBook, mStorageMode);
+				
+				String bgPath;
+                if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundLandscape();
+                } else {
+                    bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundPortrait();
+                }
+                
+                Display display = ((Activity) mContext).getWindowManager().getDefaultDisplay();
+                int width, height;
+                if (Build.VERSION.SDK_INT >= 13) {
+                    Point point = new Point();
+                    display.getSize(point);
+                    width = point.x;
+                    height = point.y;
+                } else {
+                    width = display.getWidth();
+                    height = display.getHeight();
+			    }
+                
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(bgPath, options);
+                
+                options.inSampleSize = calculateInSampleSize(options, width, height);
+                options.inJustDecodeBounds = false;
+                mBackground = new BitmapDrawable(mContext.getResources(), BitmapFactory.decodeFile(bgPath, options));
+				
 				return null;
 			}
 			
@@ -227,17 +283,10 @@ public class BakerDroidView extends ViewPager {
 			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
 			RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.layout);
 			
-			Drawable drawable;
-			if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			    drawable = Drawable.createFromPath(mDocument.getPath() + "/" + mDocument.getBackgroundLandscape());
-			} else {
-			    drawable = Drawable.createFromPath(mDocument.getPath() + "/" + mDocument.getBackgroundPortrait());
-			}
-			
 			if (Build.VERSION.SDK_INT >= 16) {
-			    layout.setBackground(drawable);
+			    layout.setBackground(mBackground);
 			} else {
-			    layout.setBackgroundDrawable(drawable);
+			    layout.setBackgroundDrawable(mBackground);
 			}
 			
 			
@@ -290,7 +339,11 @@ public class BakerDroidView extends ViewPager {
 
 		@Override
 		public int getCount() {
-			return mDocument.getContent().size();
+		    if (mDocument != null && mDocument.getContent() != null) {
+		        return mDocument.getContent().size();
+		    } else {
+		        return 0;
+		    }
 		}
 
 		@Override
@@ -298,6 +351,22 @@ public class BakerDroidView extends ViewPager {
 			return view == object;
 		}
 		
+	}
+	
+	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+    
+        if (height > reqHeight || width > reqWidth) {
+            if (width > height) {
+                inSampleSize = Math.round((float)height / (float)reqHeight);
+            } else {
+                inSampleSize = Math.round((float)width / (float)reqWidth);
+            }
+        }
+        return inSampleSize;
 	}
 	
 	private class BakerWebViewClient extends WebViewClient {
