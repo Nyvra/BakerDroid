@@ -179,33 +179,35 @@ public class BakerDroidView extends ViewPager {
 			protected Void doInBackground(Void... params) {
 				mDocument = new HPubDocument(mContext, pathToBook, mStorageMode);
 				
-				String bgPath;
-                if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundLandscape();
-                } else {
-                    bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundPortrait();
-                }
-                
-                Display display = ((Activity) mContext).getWindowManager().getDefaultDisplay();
-                int width, height;
-                if (Build.VERSION.SDK_INT >= 13) {
-                    Point point = new Point();
-                    display.getSize(point);
-                    width = point.x;
-                    height = point.y;
-                } else {
-                    width = display.getWidth();
-                    height = display.getHeight();
-			    }
-                
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(bgPath, options);
-                
-                options.inSampleSize = calculateInSampleSize(options, width, height);
-                options.inJustDecodeBounds = false;
-                mBackground = new BitmapDrawable(mContext.getResources(), BitmapFactory.decodeFile(bgPath, options));
-				
+				if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+    				String bgPath;
+                    if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundLandscape();
+                    } else {
+                        bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundPortrait();
+                    }
+                    
+                    Display display = ((Activity) mContext).getWindowManager().getDefaultDisplay();
+                    int width, height;
+                    if (Build.VERSION.SDK_INT >= 13) {
+                        Point point = new Point();
+                        display.getSize(point);
+                        width = point.x;
+                        height = point.y;
+                    } else {
+                        width = display.getWidth();
+                        height = display.getHeight();
+    			    }
+                    
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(bgPath, options);
+                    
+                    options.inSampleSize = calculateInSampleSize(options, width, height);
+                    options.inJustDecodeBounds = false;
+                    mBackground = new BitmapDrawable(mContext.getResources(), BitmapFactory.decodeFile(bgPath, options));
+				}
+    				
 				return null;
 			}
 			
@@ -283,10 +285,12 @@ public class BakerDroidView extends ViewPager {
 			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
 			RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.layout);
 			
-			if (Build.VERSION.SDK_INT >= 16) {
-			    layout.setBackground(mBackground);
-			} else {
-			    layout.setBackgroundDrawable(mBackground);
+			if (mBackground != null) {
+    			if (Build.VERSION.SDK_INT >= 16) {
+    			    layout.setBackground(mBackground);
+    			} else {
+    			    layout.setBackgroundDrawable(mBackground);
+    			}
 			}
 			
 			
