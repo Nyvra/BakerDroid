@@ -1,4 +1,4 @@
-package com.castelanjr.testedroid;
+package net.nyvra.bakerdroid.sample;
 
 import net.nyvra.bakerdroid.BakerDroidView;
 import net.nyvra.bakerdroid.BakerDroidView.StorageMode;

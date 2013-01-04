@@ -16,7 +16,7 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true" >
         <activity
-            android:name="com.castelanjr.testedroid.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
