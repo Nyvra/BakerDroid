@@ -5,7 +5,6 @@ import java.util.HashMap;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -13,7 +12,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
@@ -94,7 +92,14 @@ public class BakerDroidView extends ViewPager {
      */
     private StorageMode mStorageMode = StorageMode.STORAGE_ASSETS_FOLDER;
     
+    /**
+     * Boolean to check if the WebView zoom toast was already supressed
+     */
     private boolean mToastSupressed = false;
+    
+    /**
+     * Page background, if exists
+     */
     private Drawable mBackground;
     
     public StorageMode getStorageMode() {
@@ -296,9 +301,6 @@ public class BakerDroidView extends ViewPager {
 			
 			WebView webView = (WebView) view.findViewById(R.id.webview);
 			webView.getSettings().setBuiltInZoomControls(false);
-//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//				webView.getSettings().setDisplayZoomControls(false);
-//			}
 			webView.getSettings().setJavaScriptEnabled(true);
 			webView.getSettings().setDatabaseEnabled(true);
 			webView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");

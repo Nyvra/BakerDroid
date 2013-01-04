@@ -51,7 +51,6 @@ public class HPubDocument {
 	private boolean mZoomable = false;
 	private String mCover;
 	private String mFile;
-	private List<DocumentSetting> mSettings;
 	private BakerDroidView.StorageMode mStorageMode;
 	private String mBackgroundPortrait, mBackgroundLandscape;
 	
@@ -86,10 +85,15 @@ public class HPubDocument {
 			this.mUrl = object.getString(P_URL);
 			this.mPath = path;
 			
-			JSONArray array = object.getJSONArray(P_AUTHOR);
-			this.mAuthor = new String[array.length()];
-			for (int i = 0; i < array.length(); i++) {
-				this.mAuthor[i] = array.getString(i);
+			JSONArray array = object.optJSONArray(P_AUTHOR);
+			if (array != null) {
+    			this.mAuthor = new String[array.length()];
+    			for (int i = 0; i < array.length(); i++) {
+    				this.mAuthor[i] = array.getString(i);
+    			}
+			} else {
+			    this.mAuthor = new String[1];
+			    this.mAuthor[0] = object.getString(P_AUTHOR);
 			}
 			
 			this.mContent = new ArrayList<String>();
@@ -191,44 +195,10 @@ public class HPubDocument {
 		return mFile;
 	}
 
-	public List<DocumentSetting> getSettings() {
-		return mSettings;
-	}
-
 	public String getPath() {
 		return mPath;
 	}
 	
-	public String getUrlAtPosition(int position) {
-		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
-			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
-		} else {
-			return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position)});
-		}
-	}
-	
-	public String getFullURL(String pageName) {
-		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
-			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
-		} else {
-			String str = String.format("file:///%s/%s", new Object[] {mPath, pageName});
-			return str;
-		}
-	}
-	
-	public String getPathAtPosition(int position) {
-		return mPath + "/" + this.getContent().get(position);
-	}
-	
-	public int getPositionFromPage(String pageName) {
-		for (int i = 0; i < this.getContent().size(); i++) {
-			if (this.getUrlAtPosition(i).equals(pageName)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
     public String getBackgroundPortrait() {
         return mBackgroundPortrait;
     }
@@ -244,5 +214,59 @@ public class HPubDocument {
     public void setBackgroundLandscape(String mBackgroundLandscape) {
         this.mBackgroundLandscape = mBackgroundLandscape;
     }
+	
+	/**
+	 * Get the page URL the the determined position
+	 * 
+	 * @param position the position of the page in the document
+	 * @return the URL of the page in that position
+	 */
+	public String getUrlAtPosition(int position) {
+		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
+			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
+		} else {
+			return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position)});
+		}
+	}
+	
+	/**
+	 * Get the full page name
+	 * 
+	 * @param pageName the name of the file
+	 * @return the full URL of the page
+	 */
+	public String getFullURL(String pageName) {
+		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
+			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(pageName);
+		} else {
+			String str = String.format("file:///%s/%s", new Object[] {mPath, pageName});
+			return str;
+		}
+	}
+	
+	/**
+	 * Get the path of the page file at some position
+	 * 
+	 * @param position the position of the file
+	 * @return the path corresponding to that position
+	 */
+	public String getPathAtPosition(int position) {
+		return mPath + "/" + this.getContent().get(position);
+	}
+	
+	/**
+	 * Get the position of the page
+	 * 
+	 * @param pageName the name of the page
+	 * @return the position of that page
+	 */
+	public int getPositionFromPage(String pageName) {
+		for (int i = 0; i < this.getContent().size(); i++) {
+			if (this.getUrlAtPosition(i).equals(pageName)) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 }
