@@ -1,12 +1,15 @@
 package com.castelanjr.testedroid;
 
 import net.nyvra.bakerdroid.BakerDroidView;
+import net.nyvra.bakerdroid.BakerDroidView.StorageMode;
+import net.nyvra.bakerdroid.sample.R;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
-	BakerDroidView mBaker;
+	private BakerDroidView mBaker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -14,6 +17,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         mBaker = (BakerDroidView) findViewById(R.id.baker);
+        mBaker.setStorageMode(StorageMode.STORAGE_ASSETS_FOLDER);
         mBaker.loadDocument("book", 0, 0);
     }
 
