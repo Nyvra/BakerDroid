@@ -1,5 +1,6 @@
 package net.nyvra.bakerdroid;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
@@ -17,6 +18,7 @@ import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -298,7 +300,6 @@ public class BakerDroidView extends ViewPager {
     			}
 			}
 			
-			
 			WebView webView = (WebView) view.findViewById(R.id.webview);
 			webView.getSettings().setBuiltInZoomControls(false);
 			webView.getSettings().setJavaScriptEnabled(true);
@@ -335,11 +336,20 @@ public class BakerDroidView extends ViewPager {
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
+		    View view = (View) object;
+		    WebView webView = (WebView) view.findViewById(R.id.webview);
 		    if (mListener != null) {
-                mListener.onPageDestroyed(position, (WebView) ((View) object).findViewById(R.id.webview));
+                mListener.onPageDestroyed(position, webView);
             }
 			mCurrentViews.remove(position);
 			((ViewPager) container).removeView((View) object);
+			try {
+			    Method m = WebView.class.getMethod("onPause", (Class<?>[]) null);
+			    m.invoke(webView, (Object[]) null);
+			} catch (Exception e) {
+			    e.printStackTrace();
+			}
+			webView.destroy();
 			object = null;
 		}
 
@@ -381,6 +391,7 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
+			Log.d("BakerDroidView", "Page started: " + url);
 			
 			ProgressBar progress = (ProgressBar) view.getTag();
 			if (progress != null) {
@@ -392,6 +403,7 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
+			Log.d("BakerDroidView", "Page finished: " + url);
 			if (!mToastSupressed) {
     			new Thread(new Runnable() {
     
