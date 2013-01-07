@@ -1,26 +1,18 @@
 package net.nyvra.bakerdroid;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +25,6 @@ import android.webkit.WebSettings.PluginState;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 /**
@@ -74,11 +65,6 @@ public class BakerDroidView extends ViewPager {
 	private int mCurrentItemScrolling;
 	
 	/**
-	 * A reference to the three views being displayed in the ViewPager
-	 */
-	private SparseArray<View> mCurrentViews;
-	
-	/**
 	 * A HashMap of the javascript interfaces that will be added to the WebViews
 	 */
 	private HashMap<Object, String> mJavascriptInterfaces;
@@ -99,10 +85,18 @@ public class BakerDroidView extends ViewPager {
      */
     private boolean mToastSupressed = false;
     
+    private WebView mWebView;
+    
+    private BakerWebViewClient mWebViewCLient;
+    
+    private BakerWebChromeClient mWebChromeClient;
+
     /**
-     * Page background, if exists
-     */
-    private Drawable mBackground;
+    * A reference to the views being displayed in the ViewPager
+    */
+    private SparseArray<RelativeLayout> mCurrentViews;
+    
+    private int mLastPage;
     
     public StorageMode getStorageMode() {
         return mStorageMode;
@@ -116,14 +110,14 @@ public class BakerDroidView extends ViewPager {
 		super(context, attrs);
 		mContext = context;
 		mPager = this;
-		mCurrentViews = new SparseArray<View>();
+		mCurrentViews = new SparseArray<RelativeLayout>();
 	}
 	
 	public BakerDroidView(Context context) {
 		super(context);
 		mContext = context;
 		mPager = this;
-		mCurrentViews = new SparseArray<View>();
+		mCurrentViews = new SparseArray<RelativeLayout>();
 	}
 
 	/**
@@ -141,30 +135,7 @@ public class BakerDroidView extends ViewPager {
 	 * @return The current page WebView.
 	 */
 	public WebView getCurrentPageWebView() {
-	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem()) != null) {
-	        WebView view = (WebView) mCurrentViews.get(getCurrentItem()).findViewById(R.id.webview);
-	        return view;
-	    } else {
-	        return null;
-	    }
-	}
-	
-	public WebView getNextPageWebView() {
-	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem() + 1) != null) {
-            WebView view = (WebView) mCurrentViews.get(getCurrentItem() + 1).findViewById(R.id.webview);
-            return view;
-        } else {
-            return null;
-        }
-	}
-	
-	public WebView getPreviousPageWebView() {
-	    if (mCurrentViews != null && mCurrentViews.get(getCurrentItem() - 1) != null) {
-            WebView view = (WebView) mCurrentViews.get(getCurrentItem() - 1).findViewById(R.id.webview);
-            return view;
-        } else {
-            return null;
-        }
+	    return mWebView;
 	}
 
 	/**
@@ -180,51 +151,43 @@ public class BakerDroidView extends ViewPager {
 		
 		new AsyncTask<Void, Void, Void>() {
 
-			@SuppressLint("NewApi")
-            @SuppressWarnings("deprecation")
             @Override
 			protected Void doInBackground(Void... params) {
 				mDocument = new HPubDocument(mContext, pathToBook, mStorageMode);
-				
-				if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
-    				String bgPath;
-                    if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundLandscape();
-                    } else {
-                        bgPath = mDocument.getPath() + "/" + mDocument.getBackgroundPortrait();
-                    }
-                    
-                    Display display = ((Activity) mContext).getWindowManager().getDefaultDisplay();
-                    int width, height;
-                    if (Build.VERSION.SDK_INT >= 13) {
-                        Point point = new Point();
-                        display.getSize(point);
-                        width = point.x;
-                        height = point.y;
-                    } else {
-                        width = display.getWidth();
-                        height = display.getHeight();
-    			    }
-                    
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(bgPath, options);
-                    
-                    options.inSampleSize = calculateInSampleSize(options, width, height);
-                    options.inJustDecodeBounds = false;
-                    mBackground = new BitmapDrawable(mContext.getResources(), BitmapFactory.decodeFile(bgPath, options));
-				}
-    				
 				return null;
 			}
 			
 			protected void onPostExecute(Void result) {
+			    setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    
+                    @Override
+                    public void onPageSelected(int position) {
+                        if (position == getCurrentItem()) {
+                            setWebView(position);
+                            mListener.onPageSelected(position);
+                        }
+                    }
+                    
+                    @Override
+                    public void onPageScrolled(int arg0, float arg1, int arg2) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                    
+                    @Override
+                    public void onPageScrollStateChanged(int arg0) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                });
 				setAdapter(new BakerDroidAdapter());
 				setOffscreenPageLimit(1);
 				setCurrentItem(mInitialPage);
-				if (mListener != null) {
-					mListener.onHPubLoaded();
+				if (mInitialPage == 0) {
+				    setWebView(mInitialPage);
 				}
+				
+				if (mListener != null) mListener.onHPubLoaded();
 			};
 			
 		}.execute();
@@ -245,12 +208,10 @@ public class BakerDroidView extends ViewPager {
 	 * @return The current page Y scrolling
 	 */
 	public int getCurrentItemScrolling() {
-		View view = mCurrentViews.get(getCurrentItem(), null);
-		if (view != null) {
-			WebView webView = (WebView) view.findViewById(R.id.webview);
-			return webView.getScrollY();
-		}
-		return -1;
+	    if (mWebView != null) {
+	        return mWebView.getScrollY();
+	    }
+	    return -1;
 	}
 	
 	/**
@@ -282,74 +243,20 @@ public class BakerDroidView extends ViewPager {
 	 *
 	 */
 	class BakerDroidAdapter extends PagerAdapter {
-		BakerWebViewClient webViewCLient;
-		BakerWebChromeClient webChromeClient;
 		
-		@SuppressWarnings("deprecation")
-        @SuppressLint({ "SetJavaScriptEnabled", "NewApi" })
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-			View view = LayoutInflater.from(mContext).inflate(R.layout.webview, null);
-			RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.layout);
-			
-			if (mBackground != null) {
-    			if (Build.VERSION.SDK_INT >= 16) {
-    			    layout.setBackground(mBackground);
-    			} else {
-    			    layout.setBackgroundDrawable(mBackground);
-    			}
-			}
-			
-			WebView webView = (WebView) view.findViewById(R.id.webview);
-			webView.getSettings().setBuiltInZoomControls(false);
-			webView.getSettings().setJavaScriptEnabled(true);
-			webView.getSettings().setDatabaseEnabled(true);
-			webView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
-			webView.getSettings().setDomStorageEnabled(true);
-            webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-			webView.getSettings().setLoadWithOverviewMode(true);
-			webView.getSettings().setUseWideViewPort(true);
-			webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-			webView.getSettings().setPluginState(PluginState.ON);
-			webView.setInitialScale(1);
-			
-			webViewCLient = new BakerWebViewClient();
-			webView.setWebViewClient(webViewCLient);
-			
-			webChromeClient = new BakerWebChromeClient();
-			webView.setWebChromeClient(webChromeClient);
-			
-			if (mJavascriptInterfaces != null) {
-    			for (Object obj : mJavascriptInterfaces.keySet()) {
-    			    webView.addJavascriptInterface(obj, mJavascriptInterfaces.get(obj));
-    			}
-			}
-			
-			webView.loadUrl(mDocument.getUrlAtPosition(position));
-			
-			ProgressBar progress = (ProgressBar) view.findViewById(R.id.progressbar);
-			webView.setTag(progress);
-			mCurrentViews.put(position, view);
-			container.addView(view);
-			return view;
+		    View view = LayoutInflater.from(mContext).inflate(R.layout.progressbar, null);
+		    RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.page_layout);
+		    mCurrentViews.append(position, layout);
+		    container.addView(view);
+		    return view;
 		}
 		
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
-		    View view = (View) object;
-		    WebView webView = (WebView) view.findViewById(R.id.webview);
-		    if (mListener != null) {
-                mListener.onPageDestroyed(position, webView);
-            }
-			mCurrentViews.remove(position);
 			((ViewPager) container).removeView((View) object);
-			try {
-			    Method m = WebView.class.getMethod("onPause", (Class<?>[]) null);
-			    m.invoke(webView, (Object[]) null);
-			} catch (Exception e) {
-			    e.printStackTrace();
-			}
-			webView.destroy();
+			mCurrentViews.remove(position);
 			object = null;
 		}
 
@@ -367,6 +274,53 @@ public class BakerDroidView extends ViewPager {
 			return view == object;
 		}
 		
+	}
+	
+	@SuppressLint("SetJavaScriptEnabled")
+    private void setWebView(int position) {
+	    if (mWebView == null) {
+	        mWebView = new WebView(mContext);
+	        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+	        mWebView.setLayoutParams(params);
+	        mWebView.getSettings().setBuiltInZoomControls(false);
+	        mWebView.getSettings().setJavaScriptEnabled(true);
+	        mWebView.getSettings().setDatabaseEnabled(true);
+	        mWebView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
+	        mWebView.getSettings().setDomStorageEnabled(true);
+	        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+	        mWebView.getSettings().setLoadWithOverviewMode(true);
+	        mWebView.getSettings().setUseWideViewPort(true);
+	        mWebView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+            mWebView.getSettings().setPluginState(PluginState.ON);
+            mWebView.setInitialScale(1);
+            
+            mWebViewCLient = new BakerWebViewClient();
+            mWebView.setWebViewClient(mWebViewCLient);
+            
+            mWebChromeClient = new BakerWebChromeClient();
+            mWebView.setWebChromeClient(mWebChromeClient);
+            
+            if (mJavascriptInterfaces != null) {
+                for (Object obj : mJavascriptInterfaces.keySet()) {
+                    mWebView.addJavascriptInterface(obj, mJavascriptInterfaces.get(obj));
+                }
+            }
+	    } else {
+	        if (mListener != null) mListener.onPageDestroyed(mLastPage);
+	    }
+	    
+	    ViewGroup parent = (ViewGroup) mWebView.getParent();
+	    if (parent != null) {
+	        parent.removeView(mWebView);
+	    }
+	    
+	    mWebView.loadUrl(mDocument.getUrlAtPosition(position));
+	    RelativeLayout layout = mCurrentViews.get(position);
+	    if (layout != null) {
+	        layout.addView(mWebView);
+	    }
+	    
+	    mLastPage = position;
 	}
 	
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -393,11 +347,7 @@ public class BakerDroidView extends ViewPager {
 			super.onPageStarted(view, url, favicon);
 			Log.d("BakerDroidView", "Page started: " + url);
 			
-			ProgressBar progress = (ProgressBar) view.getTag();
-			if (progress != null) {
-				view.setVisibility(View.GONE);
-				progress.setVisibility(View.VISIBLE);
-			}
+			view.setVisibility(View.INVISIBLE);
 		}
 		
 		@Override
@@ -430,13 +380,9 @@ public class BakerDroidView extends ViewPager {
 			    }
 			}
 			if (mListener != null) {
-			    mListener.onPageLoaded(position, view);
+			    mListener.onPageLoaded(position);
 			}
-			ProgressBar progress = (ProgressBar) view.getTag();
-			if (progress != null) {
-				view.setVisibility(View.VISIBLE);
-				progress.setVisibility(View.GONE);
-			}
+			view.setVisibility(View.VISIBLE);
 		}
 		
 		@Override
@@ -462,13 +408,13 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onShowCustomView(View view, CustomViewCallback callback) {
 			super.onShowCustomView(view, callback);
-			mListener.onShowCustomView(view, callback);
+			if (mListener != null) mListener.onShowCustomView(view, callback);
 		}
 		
 		@Override
 		public void onHideCustomView() {
 			super.onHideCustomView();
-			mListener.onHideCustomView();
+			if (mListener != null) mListener.onHideCustomView();
 		}
 		
 		@Override
@@ -497,7 +443,9 @@ public class BakerDroidView extends ViewPager {
 		 * @param position the page position
 		 * @param view the WebView of the page
 		 */
-		public void onPageLoaded(int position, WebView view);
+		public void onPageLoaded(int position);
+		
+		public void onPageSelected(int position);
 		
 		/**
 		 * Event dispatched when the page is destroyed
@@ -505,7 +453,7 @@ public class BakerDroidView extends ViewPager {
 		 * @param position the page position
 		 * @param view the WebView of the page
 		 */
-		public void onPageDestroyed(int position, WebView view);
+		public void onPageDestroyed(int position);
 		
 		/**
 		 * Notify the host application that the current page would like to show a custom View.
