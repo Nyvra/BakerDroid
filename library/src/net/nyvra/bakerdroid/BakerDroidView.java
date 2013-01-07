@@ -246,7 +246,7 @@ public class BakerDroidView extends ViewPager {
 		
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-		    View view = LayoutInflater.from(mContext).inflate(R.layout.progressbar, null);
+		    View view = LayoutInflater.from(mContext).inflate(R.layout.page_layout, null);
 		    RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.page_layout);
 		    mCurrentViews.append(position, layout);
 		    container.addView(view);
