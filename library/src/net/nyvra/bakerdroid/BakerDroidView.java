@@ -6,13 +6,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -170,13 +170,11 @@ public class BakerDroidView extends ViewPager {
                     
                     @Override
                     public void onPageScrolled(int arg0, float arg1, int arg2) {
-                        // TODO Auto-generated method stub
                         
                     }
                     
                     @Override
                     public void onPageScrollStateChanged(int arg0) {
-                        // TODO Auto-generated method stub
                         
                     }
                 });
@@ -307,36 +305,14 @@ public class BakerDroidView extends ViewPager {
             }
 	    } else {
 	        if (mListener != null) mListener.onPageDestroyed(mLastPage);
+	        mWebView.stopLoading();
+	        mWebView.freeMemory();
 	    }
 	    
-	    ViewGroup parent = (ViewGroup) mWebView.getParent();
-	    if (parent != null) {
-	        parent.removeView(mWebView);
-	    }
+	    mWebView.setVisibility(View.INVISIBLE);
 	    
 	    mWebView.loadUrl(mDocument.getUrlAtPosition(position));
-	    RelativeLayout layout = mCurrentViews.get(position);
-	    if (layout != null) {
-	        layout.addView(mWebView);
-	    }
-	    
 	    mLastPage = position;
-	}
-	
-	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-    
-        if (height > reqHeight || width > reqWidth) {
-            if (width > height) {
-                inSampleSize = Math.round((float)height / (float)reqHeight);
-            } else {
-                inSampleSize = Math.round((float)width / (float)reqWidth);
-            }
-        }
-        return inSampleSize;
 	}
 	
 	private class BakerWebViewClient extends WebViewClient {
@@ -346,8 +322,6 @@ public class BakerDroidView extends ViewPager {
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
 			Log.d("BakerDroidView", "Page started: " + url);
-			
-			view.setVisibility(View.INVISIBLE);
 		}
 		
 		@Override
@@ -382,7 +356,29 @@ public class BakerDroidView extends ViewPager {
 			if (mListener != null) {
 			    mListener.onPageLoaded(position);
 			}
+			
+			// Ugly hack to prevent the WebView from "blinking" when the new content is loaded
+			try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 			view.setVisibility(View.VISIBLE);
+			view.bringToFront();
+			Log.d("BakerDroidView", "Is WebView visible? Answer: " + (view.getVisibility() == View.VISIBLE));
+			
+			ViewGroup parent = (ViewGroup) view.getParent();
+	        if (parent != null) {
+	            parent.removeView(view);
+	        }
+			
+			RelativeLayout layout = mCurrentViews.get(position);
+	        if (layout != null) {
+	            layout.setGravity(Gravity.CENTER);
+	            layout.addView(mWebView);
+	        } else {
+	            Log.d("BakerDroidView", "Layout is null!!!");
+	        }
 		}
 		
 		@Override
