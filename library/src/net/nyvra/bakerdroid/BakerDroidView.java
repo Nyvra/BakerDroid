@@ -96,7 +96,7 @@ public class BakerDroidView extends ViewPager {
     */
     private SparseArray<RelativeLayout> mCurrentViews;
     
-    private int mLastPage;
+    private int mLastPage = -1;
     
     public StorageMode getStorageMode() {
         return mStorageMode;
@@ -162,10 +162,11 @@ public class BakerDroidView extends ViewPager {
                     
                     @Override
                     public void onPageSelected(int position) {
-                        if (position == getCurrentItem()) {
+                        if (position == getCurrentItem() && mLastPage != position) {
                             setWebView(position);
                             mListener.onPageSelected(position);
                         }
+                        mLastPage = position;
                     }
                     
                     @Override
@@ -181,7 +182,7 @@ public class BakerDroidView extends ViewPager {
 				setAdapter(new BakerDroidAdapter());
 				setOffscreenPageLimit(1);
 				setCurrentItem(mInitialPage);
-				if (mInitialPage == 0) {
+				if (mInitialPage == 0 && mLastPage == -1) {
 				    setWebView(mInitialPage);
 				}
 				
@@ -286,6 +287,7 @@ public class BakerDroidView extends ViewPager {
 	        mWebView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
 	        mWebView.getSettings().setDomStorageEnabled(true);
 	        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+	        mWebView.getSettings().setAppCacheEnabled(false);
 	        mWebView.getSettings().setLoadWithOverviewMode(true);
 	        mWebView.getSettings().setUseWideViewPort(true);
 	        mWebView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
@@ -304,7 +306,7 @@ public class BakerDroidView extends ViewPager {
                 }
             }
 	    } else {
-	        if (mListener != null) mListener.onPageDestroyed(mLastPage);
+	        if (mListener != null && mLastPage != -1) mListener.onPageDestroyed(mLastPage);
 	        mWebView.stopLoading();
 	        mWebView.freeMemory();
 	    }
@@ -312,7 +314,6 @@ public class BakerDroidView extends ViewPager {
 	    mWebView.setVisibility(View.INVISIBLE);
 	    
 	    mWebView.loadUrl(mDocument.getUrlAtPosition(position));
-	    mLastPage = position;
 	}
 	
 	private class BakerWebViewClient extends WebViewClient {
@@ -344,41 +345,51 @@ public class BakerDroidView extends ViewPager {
 			}
 			
 			int position = mDocument.getPositionFromPage(url);
-			if (position == mInitialPage) {
-				if (!alreadyLoaded && mCurrentItemScrolling > 0) {
-					alreadyLoaded = true;
-			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
-			        sb.append(mCurrentItemScrolling);
-			        sb.append("/ window.devicePixelRatio);");
-			        view.loadUrl(sb.toString());
-			    }
+			if (position != -1) {
+    			if (position == mInitialPage) {
+    				if (!alreadyLoaded && mCurrentItemScrolling > 0) {
+    					alreadyLoaded = true;
+    			        StringBuilder sb = new StringBuilder("javascript:window.scrollTo(0, ");
+    			        sb.append(mCurrentItemScrolling);
+    			        sb.append("/ window.devicePixelRatio);");
+    			        view.loadUrl(sb.toString());
+    			    }
+    			}
+    			
+    			// Ugly hack to prevent the screen from blinking:
+    			try {
+                    Thread.sleep(350);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+    			
+    			view.setVisibility(View.VISIBLE);
+    			view.bringToFront();
+    			Log.d("BakerDroidView", "Is WebView visible? " + (view.getVisibility() == View.VISIBLE));
+    			
+    			ViewGroup parent = (ViewGroup) view.getParent();
+    	        if (parent != null) {
+    	            parent.removeView(view);
+    	        }
+    			
+    			RelativeLayout layout = mCurrentViews.get(position);
+    	        if (layout != null) {
+    	            layout.setGravity(Gravity.CENTER);
+    	            layout.addView(mWebView);
+    	        } else {
+    	            Log.d("BakerDroidView", "Layout is null");
+    	        }
+    	        
+    	        if (mListener != null) {
+                    mListener.onPageLoaded(position);
+                }
 			}
-			if (mListener != null) {
-			    mListener.onPageLoaded(position);
-			}
-			
-			// Ugly hack to prevent the WebView from "blinking" when the new content is loaded
-			try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-			view.setVisibility(View.VISIBLE);
-			view.bringToFront();
-			Log.d("BakerDroidView", "Is WebView visible? Answer: " + (view.getVisibility() == View.VISIBLE));
-			
-			ViewGroup parent = (ViewGroup) view.getParent();
-	        if (parent != null) {
-	            parent.removeView(view);
-	        }
-			
-			RelativeLayout layout = mCurrentViews.get(position);
-	        if (layout != null) {
-	            layout.setGravity(Gravity.CENTER);
-	            layout.addView(mWebView);
-	        } else {
-	            Log.d("BakerDroidView", "Layout is null!!!");
-	        }
+		}
+		
+		@Override
+		public void onReceivedError(WebView view, int errorCode, String description,
+		        String failingUrl) {
+		    if (mListener != null) mListener.onError(description);
 		}
 		
 		@Override
@@ -440,6 +451,8 @@ public class BakerDroidView extends ViewPager {
 		 * @param view the WebView of the page
 		 */
 		public void onPageLoaded(int position);
+		
+		public void onError(String description);
 		
 		public void onPageSelected(int position);
 		
