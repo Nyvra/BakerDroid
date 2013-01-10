@@ -55,6 +55,11 @@ public class BakerDroidView extends ViewPager {
 	private HPubListener mListener;
 	
 	/**
+	 * Listener that indicates if an URL should be overridden
+	 */
+	private URLInterceptor mURLInterceptor;
+	
+	/**
 	 * Indicates the page which should be displayed first when the HPub is opened
 	 */
 	private int mInitialPage;
@@ -395,7 +400,12 @@ public class BakerDroidView extends ViewPager {
 		@Override
 	    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			int position = mDocument.getPositionFromPage(url);
-	        if (position != -1) {
+			boolean override = false;
+			if (mURLInterceptor != null) {
+			    override = mURLInterceptor.interceptURL(url, position);
+			}
+			
+	        if (position != -1 && !override) {
 	            mPager.setCurrentItem(position, true);
 	            return true;
 	        } else {
@@ -452,8 +462,18 @@ public class BakerDroidView extends ViewPager {
 		 */
 		public void onPageLoaded(int position);
 		
+		/**
+		 * Dispatched when an error happens on the WebView
+		 * 
+		 * @param description the description of the error
+		 */
 		public void onError(String description);
 		
+		/**
+		 * Dispatched when a new page is selected, not only by pagination but by clicking in a link too
+		 * 
+		 * @param position the position of the selected page
+		 */
 		public void onPageSelected(int position);
 		
 		/**
@@ -476,6 +496,12 @@ public class BakerDroidView extends ViewPager {
 		 * Notify the host application that the current page would like to hide the custom View.
 		 */
 		public void onHideCustomView();
+	}
+	
+	public interface URLInterceptor {
+	    
+	    public boolean interceptURL(String url, int positionInDocument);
+	    
 	}
 
 }
