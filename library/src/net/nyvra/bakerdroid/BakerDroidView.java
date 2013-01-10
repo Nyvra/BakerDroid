@@ -164,7 +164,7 @@ public class BakerDroidView extends ViewPager {
                     public void onPageSelected(int position) {
                         if (position == getCurrentItem() && mLastPage != position) {
                             setWebView(position);
-                            mListener.onPageSelected(position);
+                            if (mListener != null) mListener.onPageSelected(position);
                         }
                         mLastPage = position;
                     }
