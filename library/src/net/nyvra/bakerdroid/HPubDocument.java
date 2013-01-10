@@ -223,9 +223,10 @@ public class HPubDocument {
 	 */
 	public String getUrlAtPosition(int position) {
 		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
-			return "file:///android_asset/".concat(this.getPath()).concat("/").concat(this.getContent().get(position));
+            return "file:///android_asset/" + getPath() + "/" + mContent.get(position).replace(" ", "%20");
 		} else {
-			return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position)});
+            //return String.format("file:///%s/%s", new Object[] {mPath, mContent.get(position).replace(" ", "%20")});
+            return "file:///" + mPath + "/" + mContent.get(position).replace(" ", "%20");
 		}
 	}
 	
