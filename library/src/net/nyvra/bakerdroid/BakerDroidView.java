@@ -90,6 +90,9 @@ public class BakerDroidView extends ViewPager {
      */
     private boolean mToastSupressed = false;
     
+    /**
+     * The WebView used to load the content. It's the same WebView used in all pages.
+     */
     private WebView mWebView;
     
     private BakerWebViewClient mWebViewCLient;
@@ -101,12 +104,25 @@ public class BakerDroidView extends ViewPager {
     */
     private SparseArray<RelativeLayout> mCurrentViews;
     
+    /**
+     * The last selected page
+     */
     private int mLastPage = -1;
     
+    /**
+     * Getter
+     * 
+     * @return the StorageMode, either assets folder or external storage
+     */
     public StorageMode getStorageMode() {
         return mStorageMode;
     }
     
+    /**
+     * Setter
+     * 
+     * @param storageMode Set if the content is stored on the assets folder or the external storage.
+     */
     public void setStorageMode(StorageMode storageMode) {
         mStorageMode = storageMode;
     }
@@ -280,6 +296,11 @@ public class BakerDroidView extends ViewPager {
 		
 	}
 	
+	/**
+	 * Set the WebView to load the right content
+	 * 
+	 * @param position the position of the page in the document
+	 */
 	@SuppressLint("SetJavaScriptEnabled")
     private void setWebView(int position) {
 	    if (mWebView == null) {
@@ -498,8 +519,22 @@ public class BakerDroidView extends ViewPager {
 		public void onHideCustomView();
 	}
 	
+	/**
+	 * 
+	 * Listener used to intercept the loaded URLs, can be used to indicate if some URL should be overridden
+	 * 
+	 * @author castelanjr
+	 *
+	 */
 	public interface URLInterceptor {
 	    
+	    /**
+	     * Indicates if some URL should be overridden
+	     * 
+	     * @param url the URL being loaded
+	     * @param positionInDocument the position of the page in the document. If it's not a valid position, the value of this integer is -1
+	     * @return a boolean indicating if this URL should be overridden
+	     */
 	    public boolean interceptURL(String url, int positionInDocument);
 	    
 	}
