@@ -224,6 +224,15 @@ public class BakerDroidView extends ViewPager {
 	}
 	
 	/**
+	 * Set the URLInterceptor
+	 * 
+	 * @param urlInterceptor
+	 */
+	public void setURLInterceptor(URLInterceptor urlInterceptor) {
+	    mURLInterceptor = urlInterceptor;
+	}
+	
+	/**
 	 * 
 	 * @return The current page Y scrolling
 	 */
@@ -382,7 +391,7 @@ public class BakerDroidView extends ViewPager {
     			    }
     			}
     			
-    			// Ugly hack to prevent the screen from blinking:
+    			// Ugly hack to prevent the screen from blinking - not working as desired :(
     			try {
                     Thread.sleep(350);
                 } catch (InterruptedException e) {
