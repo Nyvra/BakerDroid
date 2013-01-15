@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -357,13 +356,11 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
-			Log.d("BakerDroidView", "Page started: " + url);
 		}
 		
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
-			Log.d("BakerDroidView", "Page finished: " + url);
 			if (!mToastSupressed) {
     			new Thread(new Runnable() {
     
@@ -400,7 +397,6 @@ public class BakerDroidView extends ViewPager {
     			
     			view.setVisibility(View.VISIBLE);
     			view.bringToFront();
-    			Log.d("BakerDroidView", "Is WebView visible? " + (view.getVisibility() == View.VISIBLE));
     			
     			ViewGroup parent = (ViewGroup) view.getParent();
     	        if (parent != null) {
@@ -411,8 +407,6 @@ public class BakerDroidView extends ViewPager {
     	        if (layout != null) {
     	            layout.setGravity(Gravity.CENTER);
     	            layout.addView(mWebView);
-    	        } else {
-    	            Log.d("BakerDroidView", "Layout is null");
     	        }
     	        
     	        if (mListener != null) {
