@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -315,17 +316,18 @@ public class BakerDroidView extends ViewPager {
 	        mWebView = new WebView(mContext);
 	        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	        mWebView.setLayoutParams(params);
-	        mWebView.getSettings().setBuiltInZoomControls(false);
-	        mWebView.getSettings().setJavaScriptEnabled(true);
-	        mWebView.getSettings().setDatabaseEnabled(true);
-	        mWebView.getSettings().setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
-	        mWebView.getSettings().setDomStorageEnabled(true);
-	        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
-	        mWebView.getSettings().setAppCacheEnabled(false);
-	        mWebView.getSettings().setLoadWithOverviewMode(true);
-	        mWebView.getSettings().setUseWideViewPort(true);
-	        mWebView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-            mWebView.getSettings().setPluginState(PluginState.ON);
+	        WebSettings settings = mWebView.getSettings();
+	        settings.setBuiltInZoomControls(false);
+	        settings.setJavaScriptEnabled(true);
+	        settings.setDatabaseEnabled(true);
+	        settings.setDatabasePath("/data/data/" + mContext.getPackageName() + "/databases/");
+	        settings.setDomStorageEnabled(true);
+	        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+	        settings.setAppCacheEnabled(false);
+	        settings.setLoadWithOverviewMode(true);
+	        settings.setUseWideViewPort(true);
+	        settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+	        settings.setPluginState(PluginState.ON);
             mWebView.setInitialScale(1);
             
             mWebViewCLient = new BakerWebViewClient();
@@ -356,11 +358,13 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			super.onPageStarted(view, url, favicon);
+			Log.d("BakerDroidView", "Page started: " + url);
 		}
 		
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
+			Log.d("BakerDroidView", "Page finished: " + url);
 			if (!mToastSupressed) {
     			new Thread(new Runnable() {
     
@@ -407,6 +411,8 @@ public class BakerDroidView extends ViewPager {
     	        if (layout != null) {
     	            layout.setGravity(Gravity.CENTER);
     	            layout.addView(mWebView);
+    	        } else {
+    	            Log.d("BakerDroidView", "Layout is null");
     	        }
     	        
     	        if (mListener != null) {
