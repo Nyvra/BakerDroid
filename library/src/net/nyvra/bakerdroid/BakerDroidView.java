@@ -364,6 +364,7 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
+			view.clearCache(true);
 			Log.d("BakerDroidView", "Page finished: " + url);
 			if (!mToastSupressed) {
     			new Thread(new Runnable() {
