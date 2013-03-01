@@ -435,8 +435,12 @@ public class BakerDroidView extends ViewPager {
 			if (mURLInterceptor != null) {
 			    override = mURLInterceptor.interceptURL(url, position);
 			}
+
+            if (override) {
+                return override;
+            }
 			
-	        if (position != -1 && !override) {
+	        if (position != -1) {
 	            mPager.setCurrentItem(position, true);
 	            return true;
 	        } else {
@@ -489,7 +493,6 @@ public class BakerDroidView extends ViewPager {
 		 * Event dispatched when the page is completely loaded
 		 * 
 		 * @param position the page position
-		 * @param view the WebView of the page
 		 */
 		public void onPageLoaded(int position);
 		
@@ -511,7 +514,6 @@ public class BakerDroidView extends ViewPager {
 		 * Event dispatched when the page is destroyed
 		 * 
 		 * @param position the page position
-		 * @param view the WebView of the page
 		 */
 		public void onPageDestroyed(int position);
 		
