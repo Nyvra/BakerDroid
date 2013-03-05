@@ -108,6 +108,8 @@ public class BakerDroidView extends ViewPager {
      * The last selected page
      */
     private int mLastPage = -1;
+
+    private int mRecycleCounter = 1;
     
     /**
      * Getter
@@ -312,7 +314,16 @@ public class BakerDroidView extends ViewPager {
 	 */
 	@SuppressLint("SetJavaScriptEnabled")
     private void setWebView(int position) {
-	    if (mWebView == null) {
+	    if (mWebView == null || (mRecycleCounter % 3 == 0)) {
+            if (mWebView != null) {
+                ViewGroup parent = (ViewGroup) mWebView.getParent();
+                if (parent != null) {
+                    parent.removeView(mWebView);
+                }
+                mWebView.destroy();
+                mWebView = null;
+                mRecycleCounter = 1;
+            }
 	        mWebView = new WebView(mContext);
 	        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	        mWebView.setLayoutParams(params);
@@ -326,8 +337,6 @@ public class BakerDroidView extends ViewPager {
 	        settings.setAppCacheEnabled(false);
 	        settings.setLoadWithOverviewMode(true);
 	        settings.setUseWideViewPort(true);
-	        settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-	        settings.setPluginState(PluginState.ON);
             mWebView.setInitialScale(1);
             
             mWebViewCLient = new BakerWebViewClient();
@@ -345,6 +354,7 @@ public class BakerDroidView extends ViewPager {
 	        if (mListener != null && mLastPage != -1) mListener.onPageDestroyed(mLastPage);
 	        mWebView.stopLoading();
 	        mWebView.freeMemory();
+            mRecycleCounter++;
 	    }
 	    
 	    mWebView.setVisibility(View.INVISIBLE);
