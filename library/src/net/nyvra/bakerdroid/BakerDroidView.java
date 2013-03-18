@@ -20,8 +20,6 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebChromeClient.CustomViewCallback;
 import android.webkit.WebSettings;
-import android.webkit.WebSettings.LayoutAlgorithm;
-import android.webkit.WebSettings.PluginState;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -374,8 +372,8 @@ public class BakerDroidView extends ViewPager {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
-			view.clearCache(true);
-            mContext.deleteDatabase("webviewCache.db");
+            view.clearCache(true);
+            //mContext.deleteDatabase(Environment.getDataDirectory() + "/data/" + mContext.getPackageName() + "/databases/webviewCache.db");
 			Log.d("BakerDroidView", "Page finished: " + url);
 			if (!mToastSupressed) {
     			new Thread(new Runnable() {
