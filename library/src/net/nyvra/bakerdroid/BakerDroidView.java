@@ -428,6 +428,9 @@ public class BakerDroidView extends ViewPager {
     	        if (mListener != null) {
                     mListener.onPageLoaded(position);
                 }
+
+                // Fix the bug where the text field would not receive the user input
+                view.requestFocus(View.FOCUS_DOWN);
 			}
 		}
 		
