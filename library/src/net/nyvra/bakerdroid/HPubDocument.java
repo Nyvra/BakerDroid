@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.net.Uri;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -194,9 +195,9 @@ public class HPubDocument {
 	 */
 	public String getUrlAtPosition(int position) {
 		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
-            return "file:///android_asset/" + getPath() + "/" + mContent.get(position).replace(" ", "%20");
+            return "file:///android_asset/" + getPath() + "/" + Uri.encode(mContent.get(position));
 		} else {
-            return "file:///" + mPath + "/" + mContent.get(position).replace(" ", "%20");
+            return "file:///" + mPath + "/" + Uri.encode(mContent.get(position));
 		}
 	}
 	
