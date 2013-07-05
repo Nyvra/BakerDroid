@@ -194,6 +194,8 @@ public class HPubDocument {
 	 * @return the URL of the page in that position
 	 */
 	public String getUrlAtPosition(int position) {
+        if (mContent == null || (mContent != null && mContent.get(position) == null)) return "";
+
 		if (mStorageMode == BakerDroidView.StorageMode.STORAGE_ASSETS_FOLDER) {
             return "file:///android_asset/" + getPath() + "/" + Uri.encode(mContent.get(position));
 		} else {
